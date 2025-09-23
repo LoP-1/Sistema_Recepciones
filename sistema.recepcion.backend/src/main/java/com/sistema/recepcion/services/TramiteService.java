@@ -64,9 +64,9 @@ public class TramiteService {
 
     public String finalizarTramite(Long idTramite){
         Optional<Tramite> tramiteOPC = tramiteRepository.findById(idTramite);
-        if (tramiteOPC.isPresent()) {
+        if (tramiteOPC.isPresent()){
             Tramite tramite = tramiteOPC.get();
-        if (tramite == null) {
+        }else{
             return "Trámite no encontrado";
         }
         tramite.setEstado(true);
@@ -75,13 +75,10 @@ public class TramiteService {
         return "Trámite marcado como completado";
     }
 
-    }
 
     //servicios simples
     public List<Tramite> buscarTramitesPorDni(String dni){
         return tramiteRepository.findByPersona_Dni(dni);
     }
-
-
 
 }
