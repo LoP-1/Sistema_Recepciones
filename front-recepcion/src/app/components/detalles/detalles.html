@@ -1,0 +1,58 @@
+<div class="detalles-wrapper">
+  <h2>Agregar Detalles a Trámite Activo</h2>
+
+  <!-- Buscador y tabla de trámites activos -->
+  <div class="buscador-tramite">
+    <input type="text" placeholder="Buscar trámite por expediente, nombre o DNI..." />
+    <button type="button">Buscar</button>
+  </div>
+  <div class="tramites-table-wrapper">
+    <table class="tramites-table">
+      <thead>
+        <tr>
+          <th>Expediente</th>
+          <th>Nombre</th>
+          <th>DNI</th>
+          <th>Encargado</th>
+          <th>Inicio</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>EXP-001</td>
+          <td>Juan Pérez</td>
+          <td>87654321</td>
+          <td>Perez</td>
+          <td>2025-09-24</td>
+          <td>
+            <button type="button" class="abrir-modal">Agregar Detalle</button>
+          </td>
+        </tr>
+        <!-- Más filas dummy si quieres -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MODAL EMERGENTE para agregar detalles -->
+  <div class="modal-backdrop" style="display: none;">
+    <div class="modal-detalles">
+      <button type="button" class="modal-cerrar">&times;</button>
+      <h3>Agregar Detalle a <span class="modal-expediente">EXP-001</span></h3>
+      <form>
+        <div class="form-row">
+          <label for="detalle">Detalle:</label>
+          <textarea id="detalle" placeholder="Escribe el detalle..."></textarea>
+        </div>
+        <div class="form-row">
+          <label for="fecha">Fecha:</label>
+          <input type="date" id="fecha" />
+        </div>
+        <div class="form-actions">
+          <button type="button">Guardar</button>
+          <button type="button" class="modal-cerrar">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

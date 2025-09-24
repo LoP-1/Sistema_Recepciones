@@ -1,0 +1,205 @@
+h1 {
+  color: #157954;
+}
+
+/* NUEVO: Layout con dos columnas */
+.tramite-layout {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.tramite-main {
+  flex: 2 1 700px;
+}
+
+.tramite-activos {
+  flex: 1 1 320px;
+  margin-top: 2.5rem;
+  background: #fafafa;
+  border-radius: 8px;
+  box-shadow: 0 0 8px #eee;
+  padding: 20px;
+}
+
+.tramite-activos h2 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 1.2rem;
+}
+
+/* Buscador arriba de trámites activos */
+.buscador-activos {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.buscador-activos input[type="text"] {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #d0d0d0;
+}
+.buscador-activos button {
+  background: #157954;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+.buscador-activos button:hover {
+  background: #205c3b;
+}
+
+.tramite-activos table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.96rem;
+}
+
+.tramite-activos th, .tramite-activos td {
+  border: 1px solid #ddd;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.tramite-activos th {
+  background: #e0f5eb;
+  color: #205c3b;
+}
+
+.tramite-activos tr:nth-child(even) {
+  background: #f7fcfa;
+}
+
+/* Formulario Moderno */
+.formulario.moderno {
+  margin: 24px 0;
+  padding: 24px 32px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px #15795414;
+  border: 1px solid #e0f5eb;
+  max-width: 530px;
+}
+
+.formulario.moderno h2 {
+  font-size: 1.35rem;
+  color: #157954;
+  margin-bottom: 22px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.formulario.moderno label {
+  width: 160px;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  color: #205c3b;
+  font-size: 1rem;
+  gap: 7px;
+}
+
+.formulario.moderno input,
+.formulario.moderno textarea {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 7px;
+  border: 1px solid #d0d0d0;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border 0.2s, box-shadow 0.2s;
+  background: #f7fcfa;
+}
+
+.formulario.moderno input:focus,
+.formulario.moderno textarea:focus {
+  outline: none;
+  border: 1.5px solid #157954;
+  box-shadow: 0 0 6px #15795433;
+  background: #f5fff8;
+}
+
+.formulario.moderno textarea {
+  min-height: 48px;
+  resize: vertical;
+}
+
+.form-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 14px;
+}
+
+.formulario.moderno button {
+  margin: 0;
+  background: #157954;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 8px 22px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 1rem;
+  box-shadow: 0 1px 8px #15795422;
+  transition: background 0.18s, box-shadow 0.18s;
+}
+
+.formulario.moderno button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Otros estilos originales */
+.formulario, .busqueda, .listado {
+  margin: 24px 0;
+  padding: 16px;
+  background: #f8f8f8;
+  border-radius: 8px;
+}
+.listado ul {
+  list-style: none;
+  padding: 0;
+}
+.listado li {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #e2e2e2;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mensaje {
+  color: #125d30;
+  margin-bottom: 12px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .tramite-layout {
+    flex-direction: column;
+    gap: 0;
+  }
+  .tramite-activos {
+    margin-top: 16px;
+    min-width: 0;
+  }
+  .formulario.moderno {
+    max-width: 100%;
+    padding: 18px 12px;
+  }
+}

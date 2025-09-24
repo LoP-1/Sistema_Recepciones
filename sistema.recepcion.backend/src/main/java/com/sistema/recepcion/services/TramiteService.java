@@ -1,4 +1,4 @@
-package com.sistema.recepcion.service;
+package com.sistema.recepcion.services;
 
 import com.sistema.recepcion.DTO.TramiteDTO;
 import com.sistema.recepcion.models.Encargado;
@@ -66,19 +66,26 @@ public class TramiteService {
         Optional<Tramite> tramiteOPC = tramiteRepository.findById(idTramite);
         if (tramiteOPC.isPresent()){
             Tramite tramite = tramiteOPC.get();
-        }else{
+            tramite.setEstado(true);
+            //cambia el estado del tramite
+            tramite.setFechaFin(new Date());
+            //agrega la fecha de finalizacion
+            tramiteRepository.save(tramite);
+            return "Trámite marcado como completado";
+        } else {
             return "Trámite no encontrado";
         }
-        tramite.setEstado(true);
-        tramite.setFechaFin(new Date());
-        tramiteRepository.save(tramite);
-        return "Trámite marcado como completado";
     }
 
 
     //servicios simples
-    public List<Tramite> buscarTramitesPorDni(String dni){
+
+    //listar todos los tramites de una persona
+    public List<Tramite> listarTodosTramitesPersonaDni(String dni){
         return tramiteRepository.findByPersona_Dni(dni);
     }
+
+
+
 
 }

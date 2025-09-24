@@ -1,7 +1,5 @@
 package com.sistema.recepcion.DTO;
 
-import jakarta.persistence.Column;
-
 public class TramiteDTO {
     private String nombre;
     private String dni;

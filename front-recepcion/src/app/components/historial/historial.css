@@ -1,0 +1,219 @@
+:root {
+  --sidebar-width: 220px;
+  --sidebar-width-collapsed: 60px;
+  --color-bg-main: #FFFFFF;
+  --color-bg-sidebar: #157954;
+  --color-bg-sidebar-hover: #21263A;
+  --color-bg-hover: #D0D34D;
+  --color-text-main: #21263A;
+  --color-text-light: #FFFFFF;
+  --font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.historial-wrapper {
+  padding: 32px 24px;
+  font-family: var(--font-family);
+  background: var(--color-bg-main);
+  color: var(--color-text-main);
+  min-height: 100vh;
+}
+
+.historial-wrapper h2 {
+  font-size: 2rem;
+  color: var(--color-bg-sidebar);
+  margin-bottom: 32px;
+  letter-spacing: 1px;
+}
+
+/* Buscador */
+.buscador-persona {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 28px;
+  align-items: center;
+}
+.buscador-persona input[type="text"] {
+  padding: 8px 12px;
+  font-size: 1.08rem;
+  border-radius: 6px;
+  border: 1px solid #d0d0d0;
+  width: 200px;
+}
+.buscador-persona button {
+  background: var(--color-bg-sidebar);
+  color: var(--color-text-light);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 20px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+.buscador-persona button:hover {
+  background: var(--color-bg-sidebar-hover);
+}
+
+/* Tabla de trámites */
+.tramites-table-wrapper {
+  margin-bottom: 32px;
+}
+.tramites-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fafafa;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 8px #eee;
+}
+.tramites-table th, .tramites-table td {
+  border: 1px solid #ddd;
+  padding: 9px 12px;
+  text-align: left;
+}
+.tramites-table th {
+  background: #e0f5eb;
+  color: #205c3b;
+  font-weight: 600;
+}
+.tramites-table tr:nth-child(even) {
+  background: #f7fcfa;
+}
+.tramite-estado {
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 6px;
+}
+.tramite-estado.activo {
+  background: #d0d34d33;
+  color: #a7a800;
+}
+.tramite-estado.finalizado {
+  background: #d6f5e3;
+  color: #157954;
+}
+.tramites-table button {
+  background: transparent;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.tramites-table button:hover {
+  color: var(--color-bg-sidebar-hover);
+}
+
+/* Timeline */
+.timeline-header-block {
+  margin-bottom: 18px;
+}
+.timeline-header-block h3 {
+  font-size: 1.15rem;
+  color: #21263A;
+  font-weight: 600;
+  margin: 0;
+}
+.expediente-selected {
+  color: var(--color-bg-sidebar);
+  font-weight: 700;
+  font-size: 1.08em;
+}
+
+.timeline {
+  position: relative;
+  margin-left: 24px;
+  padding-left: 18px;
+  border-left: 3px solid #157954;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 32px;
+  padding-left: 28px;
+  transition: box-shadow 0.2s;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -14px;
+  top: 12px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-bg-sidebar);
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px #15795422;
+  z-index: 1;
+}
+.timeline-item.pendiente .timeline-dot { background: #D0D34D; }
+.timeline-item.completado .timeline-dot { background: #157954; }
+.timeline-item.observado .timeline-dot { background: #E46B4D; }
+
+.timeline-content {
+  background: #f8f8f8;
+  border-radius: 8px;
+  box-shadow: 0 0 8px #e5e5e5;
+  padding: 18px 18px 10px 18px;
+  margin-left: 0;
+}
+
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.timeline-title {
+  font-weight: 600;
+  font-size: 1.08rem;
+  color: var(--color-bg-sidebar-hover);
+}
+
+.timeline-date {
+  font-size: 0.95rem;
+  color: #888;
+}
+
+.timeline-desc {
+  font-size: 1rem;
+  color: #222;
+  margin-top: 6px;
+}
+
+@media (max-width: 700px) {
+  .historial-wrapper {
+    padding: 10px 2vw;
+  }
+  .timeline {
+    margin-left: 0;
+    padding-left: 10px;
+  }
+  .timeline-content {
+    padding: 12px 10px 8px 10px;
+  }
+  .tramites-table th, .tramites-table td {
+    padding: 7px 4px;
+    font-size: 0.95rem;
+  }
+  .buscador-persona input[type="text"] {
+    width: 120px;
+  }
+}
+
+/* Opcional: animación al hover */
+.timeline-item:hover .timeline-content {
+  box-shadow: 0 2px 16px #15795433;
+  background: #f5fff8;
+}
+
+/* Scroll amigable si hay muchos ítems */
+.timeline {
+  max-height: 80vh;
+  overflow-y: auto;
+}
