@@ -1,9 +1,11 @@
 package com.sistema.recepcion.services;
 
 import com.sistema.recepcion.DTO.TramiteDTO;
+import com.sistema.recepcion.models.DetallesTramite;
 import com.sistema.recepcion.models.Encargado;
 import com.sistema.recepcion.models.Persona;
 import com.sistema.recepcion.models.Tramite;
+import com.sistema.recepcion.repositorys.DetallesTramiteRepository;
 import com.sistema.recepcion.repositorys.EncargadoRepository;
 import com.sistema.recepcion.repositorys.PersonaRepository;
 import com.sistema.recepcion.repositorys.TramiteRepository;
@@ -23,9 +25,12 @@ public class TramiteService {
     private EncargadoRepository encargadoRepository;
 
     @Autowired
+    private DetallesTramiteRepository detallesTramiteRepository;
+
+    @Autowired
     private TramiteRepository tramiteRepository;
 
-    public String realizarTramite(TramiteDTO datosTramite) {
+    public String iniciarTramite(TramiteDTO datosTramite) {
         // Buscar persona por DNI
         Persona persona = personaRepository.findByDni(datosTramite.getDni());
         if (persona == null) {
@@ -77,6 +82,17 @@ public class TramiteService {
         }
     }
 
+    public String agregarDetallesTramite(DetallesTramite detallesTramite) {
+        Optional<Tramite> tramiteOPC = tramiteRepository.findById(detallesTramite.getTramite().getIdTramite());
+        if (tramiteOPC.isPresent()) {
+            detallesTramite.setTramite(tramiteOPC.get());
+            detallesTramite.setFechaProceso(new Date());
+            detallesTramiteRepository.save(detallesTramite);
+            return "Detalles agregados con éxito";
+        } else {
+            return "Trámite no encontrado, no se cargaron los detalles";
+        }
+    }
 
     //servicios simples
 
@@ -84,8 +100,10 @@ public class TramiteService {
     public List<Tramite> listarTodosTramitesPersonaDni(String dni){
         return tramiteRepository.findByPersona_Dni(dni);
     }
-
-
+    //obtener los tramites ordenados
+    public List<DetallesTramite> obtenerDetallesPorTramite(Long tramiteId) {
+        return detallesTramiteRepository.findByTramiteIdTramiteOrderByFechaProcesoDesc(tramiteId);
+    }
 
 
 }

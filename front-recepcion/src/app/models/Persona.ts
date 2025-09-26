@@ -1,6 +1,8 @@
 export interface Persona {
-  idPersona?: number;
+  idPersona: number;
   nombre: string;
+  apellido: string;
   dni: string;
   telefono?: string;
+  email?: string;
 }

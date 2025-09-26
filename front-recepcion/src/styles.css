@@ -1,18 +1,3 @@
-:root {
-  --sidebar-width: 220px;
-  --sidebar-width-collapsed: 60px;
-  --color-bg-main: #FFFFFF;
-  --color-bg-sidebar: #157954;
-  --color-bg-sidebar-hover: #21263A;
-  --color-bg-hover: #D0D34D;
-  --color-text-main: #21263A;
-  --color-text-light: #FFFFFF;
-  --font-family: 'Segoe UI', Arial, sans-serif;
-}
 
-/* Reset básico */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

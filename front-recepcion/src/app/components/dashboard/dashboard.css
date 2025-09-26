@@ -1,0 +1,228 @@
+:host {
+  display: block;
+  background-color: #fafafa;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+main {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Form styles */
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.button-container {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.search-field {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+/* Message card */
+.message-card {
+  margin-top: 16px;
+  background-color: #e3f2fd;
+}
+
+.error-card {
+  background-color: #ffebee;
+  color: #c62828;
+  margin-bottom: 16px;
+}
+
+.error-card mat-card-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Loading styles */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 32px;
+  color: #666;
+}
+
+/* Personas list */
+.personas-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.persona-item {
+  width: 100%;
+}
+
+.persona-name {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.persona-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dni, .telefono {
+  font-size: 12px;
+  color: #666;
+}
+
+.no-results {
+  color: #999;
+  font-style: italic;
+}
+
+/* Tramites section */
+.tramites-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.tramites-table {
+  width: 100%;
+}
+
+.mat-mdc-table {
+  background: transparent;
+}
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  color: #666;
+  text-align: center;
+}
+
+.empty-state mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+/* Skip link accessibility */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: #000;
+  color: #fff;
+  padding: 8px;
+  text-decoration: none;
+  transition: top 0.3s;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  main {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  main > mat-card:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 768px) {
+  :host {
+    padding: 8px;
+  }
+  
+  main {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .tramites-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .button-container {
+    flex-direction: column;
+  }
+}
+
+/* Material theme customizations */
+.mat-mdc-card {
+  border-radius: 12px !important;
+}
+
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.mat-mdc-chip.mat-mdc-standard-chip {
+  --mdc-chip-container-height: 24px;
+  font-size: 12px;
+}
+
+/* Table row hover effect */
+.mat-mdc-row:hover {
+  background-color: #f5f5f5;
+}
+
+
+/* Más espacio entre items de la lista de personas */
+/* Más espacio entre los items de la lista de personas */
+mat-list-item {
+  margin-bottom: 20px;
+  align-items: flex-start; /* Asegura alineación superior */
+}
+
+/* Espaciado interno entre líneas de información */
+.person-list-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px; /* Espaciado entre nombre, DNI y teléfono */
+  margin-left: 12px;
+}
+
+.person-list-name {
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.person-list-dni, .person-list-tel {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.3;
+}

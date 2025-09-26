@@ -1,15 +1,15 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environments';
-import { Encargado } from '../models/encargado';
+import { Persona } from '../models/persona';
 import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
-export class EncargadoService {
+export class PersonaService {
   private http = inject(HttpClient);
-  private base = `${environment.apiUrl}/encargado`;
+  private base = `${environment.apiUrl}/personas`;
 
-  registrar(encargado: Encargado): Observable<string> {
-    return this.http.post(this.base + '/registrar', encargado, { responseType: 'text' });
+  listar(): Observable<Persona[]> {
+    return this.http.get<Persona[]>(this.base);
   }
 }

@@ -1,58 +1,134 @@
-<div class="detalles-wrapper">
-  <h2>Agregar Detalles a Trámite Activo</h2>
+<app-navbar title="Gestión de Trámites" />
 
-  <!-- Buscador y tabla de trámites activos -->
-  <div class="buscador-tramite">
-    <input type="text" placeholder="Buscar trámite por expediente, nombre o DNI..." />
-    <button type="button">Buscar</button>
-  </div>
-  <div class="tramites-table-wrapper">
-    <table class="tramites-table">
-      <thead>
-        <tr>
-          <th>Expediente</th>
-          <th>Nombre</th>
-          <th>DNI</th>
-          <th>Encargado</th>
-          <th>Inicio</th>
-          <th>Acción</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>EXP-001</td>
-          <td>Juan Pérez</td>
-          <td>87654321</td>
-          <td>Perez</td>
-          <td>2025-09-24</td>
-          <td>
-            <button type="button" class="abrir-modal">Agregar Detalle</button>
-          </td>
-        </tr>
-        <!-- Más filas dummy si quieres -->
-      </tbody>
-    </table>
-  </div>
+<main class="detalles-main" aria-label="Agregar detalles a trámite">
+  <div class="detalles-contenedor">
+    <!-- Formulario -->
+    <section class="detalles-formulario">
+      <h2>Agregar Detalles / Evidencias</h2>
+      <form [formGroup]="form" (ngSubmit)="guardar()" novalidate class="form-container">
+        <mat-form-field appearance="outline">
+          <mat-label>ID Trámite</mat-label>
+          <input matInput id="fIdTramite" type="number" formControlName="idTramite" min="1" />
+          <mat-error *ngIf="form.controls.idTramite.touched && form.controls.idTramite.invalid">
+            Ingrese un ID válido
+          </mat-error>
+        </mat-form-field>
 
-  <!-- MODAL EMERGENTE para agregar detalles -->
-  <div class="modal-backdrop" style="display: none;">
-    <div class="modal-detalles">
-      <button type="button" class="modal-cerrar">&times;</button>
-      <h3>Agregar Detalle a <span class="modal-expediente">EXP-001</span></h3>
-      <form>
-        <div class="form-row">
-          <label for="detalle">Detalle:</label>
-          <textarea id="detalle" placeholder="Escribe el detalle..."></textarea>
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo Proceso</mat-label>
+          <mat-select id="fTipoProceso" formControlName="tipoProceso">
+            <mat-option *ngFor="let t of tiposProceso" [value]="t">{{ t }}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.controls.tipoProceso.touched && form.controls.tipoProceso.invalid">
+            Requerido
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Detalles / Descripción</mat-label>
+          <textarea matInput id="fDetalles" rows="4" formControlName="detalles"
+            placeholder="Ej: Se adjunta boleta escaneada y se llama al solicitante..."></textarea>
+          <mat-error *ngIf="form.controls.detalles.touched && form.controls.detalles.invalid">
+            Mínimo 5 caracteres
+          </mat-error>
+        </mat-form-field>
+
+        <div>
+          <h3>Adjuntar Archivo (boleta, imagen, PDF) - Opcional</h3>
+          <mat-card appearance="outlined" class="file-card"
+            fileDrop
+            (fileDropped)="onFileDropped($event)">
+            <ng-container *ngIf="!archivo(); else preview">
+              <div class="file-drop-area">
+                <mat-icon class="file-icon" fontIcon="attach_file"></mat-icon>
+                <span>Arrastra y suelta un archivo aquí, o</span>
+                <label class="file-btn">
+                  <button mat-button type="button">Seleccionar archivo</button>
+                  <input type="file"
+                    (change)="onFileInputChange($event)"
+                    accept="image/*,.pdf,.jpg,.jpeg,.png"
+                    hidden />
+                </label>
+                <span class="file-max">Máx {{ (maxSizeBytes / (1024*1024)).toFixed(1) }}MB</span>
+              </div>
+            </ng-container>
+            <ng-template #preview>
+              <div class="file-preview-area">
+                <div>
+                  <strong>{{ archivo()!.nombre }}</strong>
+                  <small>{{ archivo()!.tipo }} | {{ archivo()!.tamanoKb }} KB</small>
+                </div>
+                <div *ngIf="archivo()!.esImagen && archivo()!.base64" class="file-img-preview">
+                  <img [src]="archivo()!.base64" alt="Vista previa imagen" />
+                </div>
+                <div *ngIf="!archivo()!.esImagen" class="file-icon-preview">
+                  <mat-icon fontIcon="description"></mat-icon>
+                </div>
+                <div class="file-actions">
+                  <button mat-stroked-button color="warn" type="button" (click)="quitarArchivo()">Quitar</button>
+                  <label class="file-btn">
+                    <button mat-stroked-button color="primary" type="button">Cambiar</button>
+                    <input type="file"
+                      (change)="onFileInputChange($event)"
+                      accept="image/*,.pdf,.jpg,.jpeg,.png"
+                      hidden />
+                  </label>
+                </div>
+              </div>
+            </ng-template>
+          </mat-card>
         </div>
-        <div class="form-row">
-          <label for="fecha">Fecha:</label>
-          <input type="date" id="fecha" />
+
+        <div class="button-actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || cargando()">Guardar</button>
+          <button mat-stroked-button type="button" (click)="limpiarTodo()" [disabled]="cargando()">Limpiar</button>
         </div>
-        <div class="form-actions">
-          <button type="button">Guardar</button>
-          <button type="button" class="modal-cerrar">Cancelar</button>
+
+        <div *ngIf="mensaje()" class="msg-area">
+          <mat-card [ngClass]="{'ok': !esError(), 'err': esError()}" appearance="outlined">
+            <mat-card-content>
+              <mat-icon *ngIf="esError()" color="warn">error_outline</mat-icon>
+              <mat-icon *ngIf="!esError()" color="primary">check_circle</mat-icon>
+              {{ mensaje() }}
+            </mat-card-content>
+          </mat-card>
         </div>
       </form>
-    </div>
+    </section>
+
+    <!-- Timeline / Historial -->
+    <section class="timeline-section">
+      <h3>Línea de tiempo del trámite</h3>
+      <div *ngIf="cargandoHistorial()" class="timeline-loading">
+        <mat-spinner diameter="25"></mat-spinner>
+        <span>Cargando historial...</span>
+      </div>
+      <div *ngIf="!cargandoHistorial() && historial().length">
+        <ul class="timeline-list">
+          <li *ngFor="let item of historial()">
+            <div class="timeline-item">
+              <div class="timeline-date">
+                <mat-icon>schedule</mat-icon>
+                {{ item.fechaProceso | date:'yyyy-MM-dd HH:mm' }}
+              </div>
+              <div class="timeline-type">
+                <strong>{{ item.tipoProceso }}</strong>
+              </div>
+              <div class="timeline-details">
+                {{ item.detalles }}
+              </div>
+              <div *ngIf="item.nombreArchivo">
+                <mat-icon>attach_file</mat-icon>
+                <span>{{ item.nombreArchivo }}</span>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div *ngIf="!cargandoHistorial() && !historial().length" class="timeline-empty">
+        <mat-icon>info</mat-icon>
+        <span>Sin historial de procesos para este trámite.</span>
+      </div>
+    </section>
   </div>
-</div>
+</main>

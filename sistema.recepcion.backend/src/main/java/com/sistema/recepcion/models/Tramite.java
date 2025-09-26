@@ -1,7 +1,10 @@
 package com.sistema.recepcion.models;
 
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 @Entity
@@ -37,6 +40,9 @@ public class Tramite {
 
     @Column(name = "estado")
     private Boolean estado;
+
+    @OneToMany(mappedBy = "tramite", cascade = CascadeType.ALL)
+    private List<DetallesTramite> adicionales = new ArrayList<>();
 
     // Getters y Setters
 

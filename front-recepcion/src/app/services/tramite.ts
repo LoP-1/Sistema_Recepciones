@@ -1,40 +1,37 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { inject, Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environments';
-import { TramiteDTO } from '../models/TramiteDTO';
-import { TramiteModel } from '../models/Tramite';
+import { Tramite } from '../models/tramite';
+import { TramiteDTO } from '../models/tramite.dto';
+import { MensajeDTO } from '../models/mensaje.dto';
+import { DetallesTramite } from '../models/detalles-tramite';
+import { DniDTO } from '../models/dni.dto';
+import { Observable } from 'rxjs';
+import { HistorialProceso } from '../models/historial';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class TramiteService {
-  private apiUrl = environment.apiUrl + '/tramites';
+  private http = inject(HttpClient);
+  private base = `${environment.apiUrl}/tramites`;
 
-  constructor(private http: HttpClient) { }
-
-  registrarTramite(tramiteDTO: TramiteDTO): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(
-      `${this.apiUrl}/registrar`,
-      tramiteDTO,
-      { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) }
-    );
+  registrarTramite(payload: TramiteDTO): Observable<MensajeDTO> {
+    return this.http.post<MensajeDTO>(`${this.base}/registrar`, payload);
   }
 
-  finalizarTramite(idTramite: number): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(
-      `${this.apiUrl}/finalizar`,
-      idTramite,
-      { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) }
-    );
+  finalizarTramite(id: number): Observable<MensajeDTO> {
+    // El backend espera el número "plano" en body (JSON number)
+    return this.http.post<MensajeDTO>(`${this.base}/finalizar`, id);
   }
 
-  listarTramitesPorDni(dni: string): Observable<TramiteModel[]> {
-    const params = new HttpParams().set('dni', dni);
-    return this.http.post<TramiteModel[]>(
-      `${this.apiUrl}/dni`,
-      null,
-      { params }
-    );
+  listarPorDni(dni: string): Observable<Tramite[]> {
+    const body: DniDTO = { dni };
+    return this.http.post<Tramite[]>(`${this.base}/dni`, body);
+  }
+
+  agregarDetalles(payload: DetallesTramite): Observable<MensajeDTO> {
+    return this.http.post<MensajeDTO>(`${this.base}/detalles`, payload);
+  }
+  obtenerHistorial(idTramite: number): Observable<HistorialProceso[]> {
+    return this.http.post<HistorialProceso[]>(`${this.base}/historial`, idTramite);
   }
 }

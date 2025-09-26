@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { TramiteService } from './tramite';
+import { Tramite } from './tramite';
 
 describe('Tramite', () => {
-  let service: TramiteService;
+  let service: Tramite;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(TramiteService);
+    service = TestBed.inject(Tramite);
   });
 
   it('should be created', () => {
