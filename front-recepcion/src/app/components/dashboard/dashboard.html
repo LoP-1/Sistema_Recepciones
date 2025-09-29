@@ -1,232 +1,194 @@
-<app-navbar title="Gestión de Trámites"></app-navbar>
+<header class="masthead">
+  <h1 class="title">Gestión de Trámites</h1>
+</header>
 
-<main id="mainContent" aria-label="Panel principal de gestión">
+<main id="mainContent" class="layout">
+  <!-- FORMULARIO -->
+  <section class="card form-zone" aria-labelledby="tituloForm">
+    <div class="card-header">
+      <h2 id="tituloForm" class="card-title">Registrar Trámite</h2>
+    </div>
 
-  <!-- Panel Formulario -->
-  <mat-card appearance="outlined">
-    <mat-card-header>
-      <mat-card-title id="tituloForm">Registrar Trámite</mat-card-title>
-    </mat-card-header>
-    
-    <mat-card-content>
-      <form [formGroup]="form" (ngSubmit)="registrar()" novalidate class="form-container">
-        <mat-form-field appearance="outline">
-          <mat-label>Nombre</mat-label>
-          <input matInput formControlName="nombre" autocomplete="off" />
-          <mat-error *ngIf="form.controls.nombre.invalid && form.controls.nombre.touched">
-            Requerido
-          </mat-error>
-        </mat-form-field>
+    <form [formGroup]="form" (ngSubmit)="registrar()" novalidate class="v-form">
 
-        <mat-form-field appearance="outline">
-          <mat-label>DNI</mat-label>
-          <input matInput formControlName="dni" (keyup.enter)="cargarTramitesPorDni()" inputmode="numeric" />
-          <mat-error *ngIf="form.controls.dni.invalid && form.controls.dni.touched">
-            Requerido
-          </mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Teléfono</mat-label>
-          <input matInput formControlName="telefono" inputmode="tel" />
-          <mat-error *ngIf="form.controls.telefono.invalid && form.controls.telefono.touched">
-            Requerido
-          </mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>N° Expediente</mat-label>
-          <input #expedienteInput matInput formControlName="expediente" />
-          <mat-error *ngIf="form.controls.expediente.invalid && form.controls.expediente.touched">
-            Requerido
-          </mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Descripción / Detalles</mat-label>
-          <textarea matInput rows="3" formControlName="detalles"></textarea>
-          <mat-error *ngIf="form.controls.detalles.invalid && form.controls.detalles.touched">
-            Requerido
-          </mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>DNI Encargado</mat-label>
-          <input matInput formControlName="dniEncargado" />
-          <mat-error *ngIf="form.controls.dniEncargado.invalid && form.controls.dniEncargado.touched">
-            Requerido
-          </mat-error>
-        </mat-form-field>
-
-        <div class="button-container">
-          <button mat-raised-button color="primary" type="submit" 
-                  [disabled]="form.invalid || loadingReg()" 
-                  aria-label="Guardar trámite">
-            <mat-icon *ngIf="loadingReg()">hourglass_empty</mat-icon>
-            {{ loadingReg() ? 'Guardando...' : 'Guardar' }}
-          </button>
-          <button mat-stroked-button type="button" (click)="limpiarForm()" 
-                  aria-label="Limpiar formulario">
-            <mat-icon>clear</mat-icon>
-            Limpiar
-          </button>
+      <div class="field-grid">
+        <div class="field">
+          <label for="fNombre">Nombre <span class="req">*</span></label>
+          <input id="fNombre" formControlName="nombre"
+                 [class.invalid]="form.controls.nombre.touched && form.controls.nombre.invalid" />
+          <div class="error" *ngIf="form.controls.nombre.touched && form.controls.nombre.invalid">Requerido</div>
         </div>
 
-        <mat-card *ngIf="mensajeRegistro()" class="message-card">
-          <mat-card-content>
-            {{ mensajeRegistro() }}
-          </mat-card-content>
-        </mat-card>
-      </form>
-    </mat-card-content>
-  </mat-card>
+        <div class="field">
+          <label for="fDni">DNI <span class="req">*</span></label>
+          <input id="fDni" formControlName="dni" (keyup.enter)="cargarTramitesPorDni()"
+                 [class.invalid]="form.controls.dni.touched && form.controls.dni.invalid" />
+          <div class="error" *ngIf="form.controls.dni.touched && form.controls.dni.invalid">Requerido</div>
+        </div>
 
-  <!-- Panel Personas -->
-  <mat-card appearance="outlined">
-    <mat-card-header>
-      <mat-card-title id="tituloPersonas">Personas</mat-card-title>
-    </mat-card-header>
-    
-    <mat-card-content>
-      <mat-form-field appearance="outline" class="search-field">
-        <mat-label>Filtrar personas</mat-label>
-        <input matInput
-               type="text"
-               placeholder="Filtrar por nombre / apellido / DNI"
-               [value]="filtroPersonas()"
-               (input)="onFiltroChange($event.target.value)"
-               (keydown)="personasKeydown($event)"
-               aria-controls="listaPersonas" />
-        <mat-icon matSuffix>search</mat-icon>
-      </mat-form-field>
+        <div class="field">
+          <label for="fTelefono">Teléfono <span class="req">*</span></label>
+          <input id="fTelefono" formControlName="telefono"
+                 [class.invalid]="form.controls.telefono.touched && form.controls.telefono.invalid" />
+          <div class="error" *ngIf="form.controls.telefono.touched && form.controls.telefono.invalid">Requerido</div>
+        </div>
 
-      <div *ngIf="personasLoading()" class="loading-container">
-        <mat-spinner diameter="30"></mat-spinner>
-        <span>Cargando personas...</span>
+        <div class="field">
+          <label for="fExpediente">N° Expediente <span class="req">*</span></label>
+          <input id="fExpediente" #expedienteInput formControlName="expediente"
+                 [class.invalid]="form.controls.expediente.touched && form.controls.expediente.invalid" />
+          <div class="error" *ngIf="form.controls.expediente.touched && form.controls.expediente.invalid">Requerido</div>
+        </div>
+
+        <div class="field field-span-2">
+          <label for="fDetalles">Descripción / Detalles <span class="req">*</span></label>
+          <textarea id="fDetalles" rows="3" formControlName="detalles"
+                    [class.invalid]="form.controls.detalles.touched && form.controls.detalles.invalid"></textarea>
+          <div class="error" *ngIf="form.controls.detalles.touched && form.controls.detalles.invalid">Requerido</div>
+        </div>
+
+        <div class="field">
+          <label for="fDniEnc">DNI Encargado <span class="req">*</span></label>
+          <input id="fDniEnc" formControlName="dniEncargado"
+                 [class.invalid]="form.controls.dniEncargado.touched && form.controls.dniEncargado.invalid"/>
+          <div class="error" *ngIf="form.controls.dniEncargado.touched && form.controls.dniEncargado.invalid">Requerido</div>
+        </div>
       </div>
 
-      <mat-card *ngIf="personasError()" color="warn" class="error-card">
-        <mat-card-content>
-          <mat-icon>error</mat-icon>
-          {{ personasError() }}
-        </mat-card-content>
-      </mat-card>
+      <div class="actions">
+        <button class="btn primary" type="submit" [disabled]="form.invalid || loadingReg()" aria-label="Guardar trámite">
+          <span *ngIf="!loadingReg()">Guardar</span>
+          <span *ngIf="loadingReg()" class="inline-spinner" aria-hidden="true"></span>
+        </button>
+        <button class="btn outline" type="button" (click)="limpiarForm()">Limpiar</button>
+      </div>
 
-      <mat-selection-list #personasListBox
-                          id="listaPersonas"
-                          [multiple]="false"
-                          aria-label="Listado de personas"
-                          class="personas-list">
-        <mat-list-option *ngFor="let p of personasFiltradas(); let i = index; trackBy: trackPersona"
-                         [value]="p"
-                         [selected]="personaSeleccionada()?.idPersona === p.idPersona"
-                         (click)="seleccionarPersona(p)">
-          <div class="persona-item">
-            <div class="persona-name">{{ p.nombre }} {{ p.apellido }}</div>
-            <div class="persona-details">
-              <span class="dni">DNI: {{ p.dni }}</span>
-              <span *ngIf="p.telefono" class="telefono">Tel: {{ p.telefono }}</span>
-            </div>
-          </div>
-        </mat-list-option>
+      <div *ngIf="mensajeRegistro()" class="alert" role="status" aria-live="polite">{{ mensajeRegistro() }}</div>
+    </form>
+  </section>
 
-        <mat-list-option *ngIf="!personasFiltradas().length && !personasLoading()" disabled>
-          <span class="no-results">No hay resultados.</span>
-        </mat-list-option>
-      </mat-selection-list>
-    </mat-card-content>
-  </mat-card>
+  <!-- PERSONAS -->
+  <section class="card people-zone" aria-labelledby="tituloPersonas">
+    <div class="card-header">
+      <h2 id="tituloPersonas" class="card-title">Personas</h2>
+    </div>
 
-  <!-- Panel Trámites -->
-  <mat-card appearance="outlined">
-    <mat-card-header>
-      <mat-card-title id="tituloTramites">
+    <div class="field">
+      <label for="fFiltro">Filtrar personas</label>
+      <input id="fFiltro"
+             type="text"
+             placeholder="Nombre / Apellido / DNI"
+             [value]="filtroPersonas()"
+             (input)="onFiltroChange($any($event.target).value)"
+             (keydown)="personasKeydown($event)"
+             aria-controls="listaPersonas" />
+    </div>
+
+    <div *ngIf="personasLoading()" class="loading" aria-live="polite">
+      <span class="inline-spinner" aria-hidden="true"></span> Cargando personas...
+    </div>
+    <div *ngIf="personasError()" class="alert error" role="alert">{{ personasError() }}</div>
+
+    <ul id="listaPersonas" class="person-list" role="listbox" [attr.aria-busy]="personasLoading()">
+      <li *ngFor="let p of personasPagina(); let i = index; trackBy: trackPersona"
+          role="option"
+          [attr.aria-selected]="personaSeleccionada()?.idPersona === p.idPersona"
+          class="person-item"
+          [class.selected]="personaSeleccionada()?.idPersona === p.idPersona"
+          [class.active]="tecladoIndex() === i"
+          (click)="seleccionarPersona(p)">
+        <span class="person-name">{{ p.nombre }} {{ p.apellido }}</span>
+        <span class="person-dni">DNI: {{ p.dni }}</span>
+        <span *ngIf="p.telefono" class="person-tel">Tel: {{ p.telefono }}</span>
+      </li>
+      <li *ngIf="!personasPagina().length && !personasLoading()" class="empty">No hay resultados</li>
+    </ul>
+
+    <!-- Paginador ABAJO -->
+    <div class="pagination-toolbar pagination-bottom" *ngIf="personasFiltradas().length">
+      <nav class="pager" aria-label="Paginación personas">
+        <button class="btn small ghost"
+                (click)="changePage(-1)"
+                [disabled]="currentPage() === 1"
+                aria-label="Página anterior">‹</button>
+        <span class="pager-info">Página {{ currentPage() }} de {{ totalPages() }}</span>
+        <button class="btn small ghost"
+                (click)="changePage(1)"
+                [disabled]="currentPage() === totalPages()"
+                aria-label="Página siguiente">›</button>
+      </nav>
+      <div class="page-size">
+        <label for="selSize" class="visually-hidden">Elementos por página</label>
+        <select id="selSize"
+                [value]="pageSize()"
+                (change)="setPageSize(+($any($event.target).value))"
+                aria-label="Elementos por página">
+          <option *ngFor="let opt of pageSizeOptions" [value]="opt">{{ opt }}/pág.</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRÁMITES -->
+  <section class="card tramite-zone" aria-labelledby="tituloTramites">
+    <div class="card-header">
+      <h2 id="tituloTramites" class="card-title">
         Trámites de {{ personaSeleccionada()?.nombre || '...' }}
-      </mat-card-title>
-      <mat-card-subtitle>
-        <div class="tramites-controls">
-          <mat-checkbox
-                   [checked]="mostrarCompletados()"
-                   (change)="toggleCompletados()"
-                   aria-controls="tablaTramites">
-            Mostrar completados
-          </mat-checkbox>
-          <button mat-icon-button
-                  (click)="refrescarTramites()"
-                  [disabled]="cargandoTramites()"
-                  aria-label="Refrescar trámites de la persona seleccionada"
-                  matTooltip="Refrescar trámites">
-            <mat-icon>refresh</mat-icon>
-          </button>
-        </div>
-      </mat-card-subtitle>
-    </mat-card-header>
-
-    <mat-card-content>
-      <div *ngIf="!personaSeleccionada()" class="empty-state">
-        <mat-icon>person_outline</mat-icon>
-        <p>Selecciona una persona para ver sus trámites.</p>
+      </h2>
+      <div class="toolbar">
+        <label class="check">
+          <input type="checkbox" [checked]="mostrarCompletados()" (change)="toggleCompletados()" />
+          Mostrar completados
+        </label>
+        <button class="btn ghost small" (click)="refrescarTramites()" [disabled]="cargandoTramites()" aria-label="Refrescar trámites">⟳</button>
       </div>
+    </div>
 
-      <div *ngIf="cargandoTramites()" class="loading-container">
-        <mat-spinner diameter="30"></mat-spinner>
-        <span>Cargando trámites...</span>
-      </div>
+    <div *ngIf="!personaSeleccionada()" class="placeholder" aria-live="polite">
+      Selecciona una persona para ver sus trámites.
+    </div>
 
-      <div *ngIf="personaSeleccionada() && !cargandoTramites() && tramitesFiltrados().length"
-           class="table-container">
-        <table mat-table [dataSource]="tramitesFiltrados()" id="tablaTramites" class="tramites-table">
-          
-          <ng-container matColumnDef="idTramite">
-            <th mat-header-cell *matHeaderCellDef>ID</th>
-            <td mat-cell *matCellDef="let tramite">{{ tramite.idTramite }}</td>
-          </ng-container>
+    <div *ngIf="cargandoTramites()" class="loading" aria-live="polite">
+      <span class="inline-spinner" aria-hidden="true"></span> Cargando trámites...
+    </div>
 
-          <ng-container matColumnDef="nroExpediente">
-            <th mat-header-cell *matHeaderCellDef>Expediente</th>
-            <td mat-cell *matCellDef="let tramite">{{ tramite.nroExpediente }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="descripcion">
-            <th mat-header-cell *matHeaderCellDef>Descripción</th>
-            <td mat-cell *matCellDef="let tramite">{{ tramite.descripcion }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="fechaInicio">
-            <th mat-header-cell *matHeaderCellDef>Inicio</th>
-            <td mat-cell *matCellDef="let tramite">{{ tramite.fechaInicio | date:'yyyy-MM-dd' }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="fechaFin">
-            <th mat-header-cell *matHeaderCellDef>Fin</th>
-            <td mat-cell *matCellDef="let tramite">{{ tramite.fechaFin ? (tramite.fechaFin | date:'yyyy-MM-dd') : '-' }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="estado">
-            <th mat-header-cell *matHeaderCellDef>Estado</th>
-            <td mat-cell *matCellDef="let tramite">
-              <mat-chip-set>
-                <mat-chip [color]="tramite.estado ? 'accent' : 'primary'" selected>
-                  {{ tramite.estado ? 'Completado' : 'Activo' }}
-                </mat-chip>
-              </mat-chip-set>
-            </td>
-          </ng-container>
-
-          <!-- Fila con click para abrir detalles -->
-          <tr mat-row 
-              *matRowDef="let row; columns: displayedColumns;"
-              (click)="abrirDetalles(row.idTramite)">
-          </tr>
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <div *ngIf="personaSeleccionada() && !cargandoTramites() && tramitesFiltrados().length"
+         class="table-wrapper table-wrapper--wide fade-in">
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="col-id">ID</th>
+              <th class="col-exp">Expediente</th>
+              <th class="col-desc">Descripción</th>
+              <th class="col-inicio">Inicio</th>
+              <th class="col-fin">Fin</th>
+              <th class="col-estado">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let t of tramitesFiltrados(); trackBy: trackTramite"
+                (click)="abrirDetalles(t.idTramite)" class="row-link" tabindex="0">
+              <td class="col-id">{{ t.idTramite }}</td>
+              <td class="col-exp">{{ t.nroExpediente }}</td>
+              <td class="col-desc">
+                <span class="truncate" [title]="t.descripcion">{{ t.descripcion }}</span>
+              </td>
+              <td class="col-inicio">{{ t.fechaInicio | date:'yyyy-MM-dd' }}</td>
+              <td class="col-fin">{{ t.fechaFin ? (t.fechaFin | date:'yyyy-MM-dd') : '-' }}</td>
+              <td class="col-estado">
+                <span class="status" [class.done]="t.estado" [class.active]="!t.estado">
+                  {{ t.estado ? 'Completado' : 'Activo' }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
         </table>
       </div>
+    </div>
 
-      <div *ngIf="personaSeleccionada() && !cargandoTramites() && !tramitesFiltrados().length"
-           class="empty-state">
-        <mat-icon>assignment</mat-icon>
-        <p>No hay trámites para mostrar con el filtro actual.</p>
-      </div>
-    </mat-card-content>
-  </mat-card>
+    <div *ngIf="personaSeleccionada() && !cargandoTramites() && !tramitesFiltrados().length" class="placeholder">
+      No hay trámites para mostrar con el filtro actual.
+    </div>
+  </section>
 </main>

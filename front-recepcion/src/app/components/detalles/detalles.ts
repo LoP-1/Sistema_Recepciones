@@ -1,19 +1,13 @@
 import { Component, inject, signal, computed, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormsModule } from '@angular/forms';
 import { TramiteService } from '../../services/tramite';
 import { DetallesTramite } from '../../models/detalles-tramite';
 import { HistorialProceso } from '../../models/historial';
-import { Navbar } from '../navbar/navbar';
 import { FileDropDirective } from './file-drop-directive';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { environment } from '../../../environments/environments';
+import { ModalRef } from '../../shared/ui/modal/modal-ref';
+import { MODAL_DATA } from '../../shared/ui/modal/modal.tokens';
 
 interface ArchivoPreview {
   file: File;
@@ -31,15 +25,7 @@ interface ArchivoPreview {
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
-    Navbar,
-    FileDropDirective,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatIconModule,
-    MatCardModule,
-    MatProgressSpinnerModule
+    FileDropDirective
   ],
   templateUrl: './detalles.html',
   styleUrl: './detalles.css'
@@ -47,14 +33,9 @@ interface ArchivoPreview {
 export class AgregarDetallesTramite implements OnInit {
   private fb = inject(FormBuilder);
   private tramiteService = inject(TramiteService);
+  private modalRef = inject(ModalRef<AgregarDetallesTramite>);
 
-  tiposProceso = [
-    'Seguimiento',
-    'Llamada',
-    'Verificación',
-    'Adjunto',
-    'Observación'
-  ];
+  tiposProceso = ['Seguimiento','Llamada','Verificación','Adjunto','Observación'];
 
   form = this.fb.nonNullable.group({
     idTramite: [0, [Validators.required, Validators.min(1)]],
@@ -69,11 +50,10 @@ export class AgregarDetallesTramite implements OnInit {
   maxSizeBytes = 5 * 1024 * 1024;
   ariaLive = computed(() => this.mensaje());
 
-  // Timeline/historial
   historial = signal<HistorialProceso[]>([]);
   cargandoHistorial = signal(false);
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: { idTramite?: number }) {
+  constructor(@Inject(MODAL_DATA) public data: { idTramite?: number } | null) {
     if (data?.idTramite) {
       this.form.patchValue({ idTramite: data.idTramite });
     }
@@ -82,6 +62,10 @@ export class AgregarDetallesTramite implements OnInit {
   ngOnInit() {
     this.cargarHistorial();
     this.form.controls.idTramite.valueChanges.subscribe(() => this.cargarHistorial());
+  }
+
+  cerrar() {
+    this.modalRef.close();
   }
 
   cargarHistorial() {
@@ -181,7 +165,7 @@ export class AgregarDetallesTramite implements OnInit {
     this.esError.set(false);
     this.cargarHistorial();
   }
-
+  cargandoFinalizar = signal(false);
   private focusFirstInvalid() {
     const invalidKey = Object.keys(this.form.controls)
       .find(k => (this.form.controls as any)[k].invalid);
@@ -189,4 +173,34 @@ export class AgregarDetallesTramite implements OnInit {
     const el = document.querySelector<HTMLElement>(`[formcontrolname="${invalidKey}"]`);
     el?.focus();
   }
+
+  descargarAdjunto(item: HistorialProceso) {
+    if (!item.nombreArchivo) return;
+    const url = `${environment.apiUrl}/${encodeURIComponent(item.nombreArchivo)}`;
+    window.open(url, '_blank');
+  }
+  finalizarTramiteClick() {
+  if (this.form.controls.idTramite.invalid) {
+    this.form.controls.idTramite.markAsTouched();
+    return;
+  }
+  const id = this.form.value.idTramite!;
+  this.cargandoFinalizar.set(true);
+  this.mensaje.set('');
+  this.esError.set(false);
+
+  this.tramiteService.finalizarTramite(id).subscribe({
+    next: r => {
+      this.mensaje.set(r.mensaje || 'Trámite finalizado correctamente');
+      this.esError.set(false);
+      this.cargarHistorial();
+    },
+    error: e => {
+      this.mensaje.set(e.error?.mensaje || 'No se pudo finalizar el trámite');
+      this.esError.set(true);
+    },
+    complete: () => this.cargandoFinalizar.set(false)
+  });
+}
+
 }

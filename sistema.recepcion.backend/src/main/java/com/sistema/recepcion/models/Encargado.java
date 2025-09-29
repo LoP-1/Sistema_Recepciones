@@ -19,7 +19,20 @@ public class Encargado {
     @Column(name = "dni", length = 10, nullable = false, unique = true)
     private String dni;
 
+    @Column(name = "contraseña", nullable = false)
+    private String password;
+
+
     // Getters y Setters
+
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
     public Long getIdEncargado() {
         return idEncargado;

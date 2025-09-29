@@ -1,61 +1,28 @@
 import { Component, inject, signal, computed, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTableModule } from '@angular/material/table';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-
 import { PersonaService } from '../../services/persona';
 import { TramiteService } from '../../services/tramite';
 import { TramiteDTO } from '../../models/tramite.dto';
 import { Tramite } from '../../models/tramite';
 import { Persona } from '../../models/persona';
-import { Navbar } from '../navbar/navbar';
 import { AgregarDetallesTramite } from '../detalles/detalles';
+import { ModalService } from '../../shared/ui/modal/modal.service';
 
 @Component({
   standalone: true,
   selector: 'app-dashboard',
-  imports: [
-    CommonModule, 
-    ReactiveFormsModule, 
-    Navbar,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatListModule,
-    MatCheckboxModule,
-    MatProgressSpinnerModule,
-    MatTableModule,
-    MatChipsModule,
-    MatTooltipModule,
-    MatDialogModule
-  ],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
 export class Dashboard implements AfterViewInit {
-  private dialog = inject(MatDialog);
-
   private fb = inject(FormBuilder);
   private personaService = inject(PersonaService);
   private tramiteService = inject(TramiteService);
+  private modal = inject(ModalService);
 
   @ViewChild('expedienteInput') expedienteInput!: ElementRef<HTMLInputElement>;
-
-  displayedColumns: string[] = ['idTramite', 'nroExpediente', 'descripcion', 'fechaInicio', 'fechaFin', 'estado'];
 
   form = this.fb.nonNullable.group({
     nombre: ['', Validators.required],
@@ -70,15 +37,43 @@ export class Dashboard implements AfterViewInit {
   loadingReg = signal(false);
 
   personas = signal<Persona[]>([]);
-  personasFiltradas = signal<Persona[]>([]);
-  personaSeleccionada = signal<Persona | null>(null);
   filtroPersonas = signal('');
   personasLoading = signal(false);
   personasError = signal('');
+  personaSeleccionada = signal<Persona | null>(null);
+
   tramites = signal<Tramite[]>([]);
   cargandoTramites = signal(false);
   mostrarCompletados = signal(false);
   tecladoIndex = signal(-1);
+
+  // Paginación
+  pageSizeOptions = [5, 10, 20, 50];
+  pageSize = signal(10);
+  currentPage = signal(1);
+
+  personasFiltradas = computed(() => {
+    const term = this.filtroPersonas().toLowerCase().trim();
+    const base = this.personas();
+    if (!term) return base;
+    return base.filter(p =>
+      (p.nombre + ' ' + (p as any).apellido + ' ' + p.dni)
+        .toLowerCase().includes(term)
+    );
+  });
+
+  totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.personasFiltradas().length / this.pageSize()))
+  );
+
+  personasPagina = computed(() => {
+    const ps = this.pageSize();
+    let page = this.currentPage();
+    const total = this.totalPages();
+    if (page > total) page = total;
+    const start = (page - 1) * ps;
+    return this.personasFiltradas().slice(start, start + ps);
+  });
 
   tramitesFiltrados = computed(() =>
     this.mostrarCompletados() ? this.tramites() : this.tramites().filter(t => !t.estado)
@@ -94,31 +89,35 @@ export class Dashboard implements AfterViewInit {
     this.personaService.listar().subscribe({
       next: res => {
         this.personas.set(res);
-        this.aplicarFiltro(this.filtroPersonas());
+        this.resetPaginationAfterFilter();
       },
       error: () => this.personasError.set('Error al cargar personas'),
       complete: () => this.personasLoading.set(false)
     });
   }
 
-  onFiltroChange(value: any) {
-    const v = typeof value === 'string' ? value : value.target?.value || '';
+  onFiltroChange(v: string) {
     this.filtroPersonas.set(v);
-    this.aplicarFiltro(v);
+    this.resetPaginationAfterFilter();
   }
 
-  private aplicarFiltro(term: string) {
-    const t = term.toLowerCase().trim();
-    if (!t) {
-      this.personasFiltradas.set(this.personas());
-      this.tecladoIndex.set(this.personas().length ? 0 : -1);
-      return;
-    }
-    const filtered = this.personas().filter(p =>
-      (p.nombre + ' ' + (p as any).apellido + ' ' + p.dni).toLowerCase().includes(t)
-    );
-    this.personasFiltradas.set(filtered);
-    this.tecladoIndex.set(filtered.length ? 0 : -1);
+  resetPaginationAfterFilter() {
+    this.currentPage.set(1);
+    const list = this.personasFiltradas();
+    this.tecladoIndex.set(list.length ? 0 : -1);
+  }
+
+  changePage(delta: number) {
+    const next = this.currentPage() + delta;
+    if (next < 1 || next > this.totalPages()) return;
+    this.currentPage.set(next);
+    this.tecladoIndex.set(this.personasPagina().length ? 0 : -1);
+  }
+
+  setPageSize(size: number) {
+    this.pageSize.set(size);
+    this.currentPage.set(1);
+    this.tecladoIndex.set(this.personasPagina().length ? 0 : -1);
   }
 
   seleccionarPersona(p: Persona, focusExpediente = true) {
@@ -135,7 +134,7 @@ export class Dashboard implements AfterViewInit {
   }
 
   personasKeydown(ev: KeyboardEvent) {
-    const list = this.personasFiltradas();
+    const list = this.personasPagina();
     if (!list.length) return;
     switch (ev.key) {
       case 'ArrowDown':
@@ -218,18 +217,12 @@ export class Dashboard implements AfterViewInit {
     el?.focus();
   }
 
-  seleccionarPersonaById(id: number) {
-    const persona = this.personasFiltradas().find(p => p.idPersona === id);
-    if (persona) {
-      this.seleccionarPersona(persona);
-    }
-  }
-
   abrirDetalles(idTramite: number) {
-    this.dialog.open(AgregarDetallesTramite, {
-      data: { idTramite },
-      width: '1200px',
-      maxWidth: '90vw'
-    });
-  }
+  this.modal.open(AgregarDetallesTramite, {
+  data: { idTramite },
+  ariaLabel: 'Agregar detalles al trámite',
+  width: 'min(1400px, 95vw)',
+  panelClass: 'modal-sheet'
+});
+}
 }

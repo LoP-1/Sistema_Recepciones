@@ -6,4 +6,4 @@ export interface DetallesTramite {
   detalles: string;
   nombreArchivo: string;
   urlArchivo: string;
-}
+}   
