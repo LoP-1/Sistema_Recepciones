@@ -12,4 +12,8 @@ export class EncargadoService {
   registrar(encargado: Encargado): Observable<string> {
     return this.http.post(this.base + '/registrar', encargado, { responseType: 'text' });
   }
+
+  login(dni: string, password: string): Observable<{ token: string }> {
+    return this.http.post<{ token: string }>(this.base + '/login', { dni, password });
+  }
 }

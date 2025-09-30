@@ -1,8 +1,0 @@
-/* Estilos base opcionales del root */
-:host {
-  display: block;
-  min-height: 100dvh;
-  background: var(--c-bg);
-  color: var(--c-fg);
-  font: 14px/1.4 system-ui, 'Segoe UI', Roboto, Arial, sans-serif;
-}

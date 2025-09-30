@@ -30,7 +30,7 @@ export class Dashboard implements AfterViewInit {
     telefono: ['', Validators.required],
     expediente: ['', Validators.required],
     detalles: ['', Validators.required],
-    dniEncargado: ['', Validators.required]
+    // dniEncargado eliminado del formulario
   });
 
   mensajeRegistro = signal('');
@@ -175,7 +175,10 @@ export class Dashboard implements AfterViewInit {
     }
     this.loadingReg.set(true);
     this.mensajeRegistro.set('');
-    const payload: TramiteDTO = this.form.getRawValue();
+    // Obtiene el DNI encargado desde localStorage
+    const dniEncargado = localStorage.getItem('dni') || '';
+    const payload: TramiteDTO = { ...this.form.getRawValue(), dniEncargado };
+
     this.tramiteService.registrarTramite(payload).subscribe({
       next: r => {
         this.mensajeRegistro.set(r.mensaje);
@@ -198,9 +201,14 @@ export class Dashboard implements AfterViewInit {
       dni: p?.dni || '',
       telefono: p?.telefono || '',
       expediente: '',
-      detalles: '',
-      dniEncargado: ''
+      detalles: ''
+      // dniEncargado eliminado
     });
+  }
+
+  logout() {
+    localStorage.clear();
+    location.reload();
   }
 
   toggleCompletados() {
@@ -218,11 +226,11 @@ export class Dashboard implements AfterViewInit {
   }
 
   abrirDetalles(idTramite: number) {
-  this.modal.open(AgregarDetallesTramite, {
-  data: { idTramite },
-  ariaLabel: 'Agregar detalles al trámite',
-  width: 'min(1400px, 95vw)',
-  panelClass: 'modal-sheet'
-});
-}
+    this.modal.open(AgregarDetallesTramite, {
+      data: { idTramite },
+      ariaLabel: 'Agregar detalles al trámite',
+      width: 'min(1400px, 95vw)',
+      panelClass: 'modal-sheet'
+    });
+  }
 }

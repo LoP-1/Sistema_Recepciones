@@ -27,4 +27,14 @@ public class EncargadoController {
     }
 
 
+    @PostMapping("/login")
+    public ResponseEntity<JwtResponse> login(@RequestBody LoginRequest request) {
+        String token = encargadoService.login(request.dni(), request.password());
+        return ResponseEntity.ok(new JwtResponse(token));
+    }
+
+    public record LoginRequest(String dni, String password) {}
+    public record JwtResponse(String token) {}
+
+
 }

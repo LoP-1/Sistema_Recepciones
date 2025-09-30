@@ -3,4 +3,5 @@ export interface Encargado {
   nombre: string;
   apellido: string;
   dni: string;
+  password: string;
 }

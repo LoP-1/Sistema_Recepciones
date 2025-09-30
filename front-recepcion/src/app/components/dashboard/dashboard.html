@@ -10,7 +10,6 @@
     </div>
 
     <form [formGroup]="form" (ngSubmit)="registrar()" novalidate class="v-form">
-
       <div class="field-grid">
         <div class="field">
           <label for="fNombre">Nombre <span class="req">*</span></label>
@@ -45,13 +44,6 @@
           <textarea id="fDetalles" rows="3" formControlName="detalles"
                     [class.invalid]="form.controls.detalles.touched && form.controls.detalles.invalid"></textarea>
           <div class="error" *ngIf="form.controls.detalles.touched && form.controls.detalles.invalid">Requerido</div>
-        </div>
-
-        <div class="field">
-          <label for="fDniEnc">DNI Encargado <span class="req">*</span></label>
-          <input id="fDniEnc" formControlName="dniEncargado"
-                 [class.invalid]="form.controls.dniEncargado.touched && form.controls.dniEncargado.invalid"/>
-          <div class="error" *ngIf="form.controls.dniEncargado.touched && form.controls.dniEncargado.invalid">Requerido</div>
         </div>
       </div>
 
@@ -192,3 +184,8 @@
     </div>
   </section>
 </main>
+
+<!-- Botón logout fijo esquina inferior derecha -->
+<button class="btn danger btn-logout" (click)="logout()" aria-label="Cerrar sesión" title="Cerrar sesión">
+  <span>Salir</span>
+</button>
