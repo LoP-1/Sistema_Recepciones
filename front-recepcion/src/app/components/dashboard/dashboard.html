@@ -1,61 +1,93 @@
 <header class="masthead">
   <h1 class="title">Gestión de Trámites</h1>
+  <img src="logo-drej.png" alt="Logo DREJ" class="masthead-logo" />
 </header>
 
-<main id="mainContent" class="layout">
+<main id="mainContent" class="layout" tabindex="-1">
   <!-- FORMULARIO -->
   <section class="card form-zone" aria-labelledby="tituloForm">
     <div class="card-header">
       <h2 id="tituloForm" class="card-title">Registrar Trámite</h2>
     </div>
 
-    <form [formGroup]="form" (ngSubmit)="registrar()" novalidate class="v-form">
+    <form [formGroup]="form" (ngSubmit)="registrar()" novalidate class="v-form" autocomplete="off">
       <div class="field-grid">
         <div class="field">
-          <label for="fNombre">Nombre <span class="req">*</span></label>
-          <input id="fNombre" formControlName="nombre"
+          <label for="fNombre">Nombre <span class="req" aria-hidden="true">*</span></label>
+          <input id="fNombre"
+                 formControlName="nombre"
+                 autocomplete="off"
+                 [attr.aria-invalid]="form.controls.nombre.invalid && form.controls.nombre.touched || null"
                  [class.invalid]="form.controls.nombre.touched && form.controls.nombre.invalid" />
-          <div class="error" *ngIf="form.controls.nombre.touched && form.controls.nombre.invalid">Requerido</div>
+          @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
+            <div class="error" id="errNombre">Requerido</div>
+          }
         </div>
 
         <div class="field">
-          <label for="fDni">DNI <span class="req">*</span></label>
-          <input id="fDni" formControlName="dni" (keyup.enter)="cargarTramitesPorDni()"
-                 [class.invalid]="form.controls.dni.touched && form.controls.dni.invalid" />
-          <div class="error" *ngIf="form.controls.dni.touched && form.controls.dni.invalid">Requerido</div>
+          <label for="fDni">DNI <span class="req" aria-hidden="true">*</span></label>
+            <input id="fDni"
+                   formControlName="dni"
+                   inputmode="numeric"
+                   (keyup.enter)="cargarTramitesPorDni()"
+                   [attr.aria-invalid]="form.controls.dni.invalid && form.controls.dni.touched || null"
+                   [class.invalid]="form.controls.dni.touched && form.controls.dni.invalid" />
+          @if (form.controls.dni.touched && form.controls.dni.invalid) {
+            <div class="error" id="errDni">Requerido</div>
+          }
         </div>
 
         <div class="field">
-          <label for="fTelefono">Teléfono <span class="req">*</span></label>
-          <input id="fTelefono" formControlName="telefono"
+          <label for="fTelefono">Teléfono <span class="req" aria-hidden="true">*</span></label>
+          <input id="fTelefono"
+                 formControlName="telefono"
+                 inputmode="tel"
+                 [attr.aria-invalid]="form.controls.telefono.invalid && form.controls.telefono.touched || null"
                  [class.invalid]="form.controls.telefono.touched && form.controls.telefono.invalid" />
-          <div class="error" *ngIf="form.controls.telefono.touched && form.controls.telefono.invalid">Requerido</div>
+          @if (form.controls.telefono.touched && form.controls.telefono.invalid) {
+            <div class="error">Requerido</div>
+          }
         </div>
 
         <div class="field">
-          <label for="fExpediente">N° Expediente <span class="req">*</span></label>
-          <input id="fExpediente" #expedienteInput formControlName="expediente"
+          <label for="fExpediente">N° Expediente <span class="req" aria-hidden="true">*</span></label>
+          <input id="fExpediente"
+                 #expedienteInput
+                 formControlName="expediente"
+                 [attr.aria-invalid]="form.controls.expediente.invalid && form.controls.expediente.touched || null"
                  [class.invalid]="form.controls.expediente.touched && form.controls.expediente.invalid" />
-          <div class="error" *ngIf="form.controls.expediente.touched && form.controls.expediente.invalid">Requerido</div>
+          @if (form.controls.expediente.touched && form.controls.expediente.invalid) {
+            <div class="error">Requerido</div>
+          }
         </div>
 
         <div class="field field-span-2">
-          <label for="fDetalles">Descripción / Detalles <span class="req">*</span></label>
-          <textarea id="fDetalles" rows="3" formControlName="detalles"
+          <label for="fDetalles">Descripción / Detalles <span class="req" aria-hidden="true">*</span></label>
+          <textarea id="fDetalles"
+                    rows="3"
+                    formControlName="detalles"
+                    [attr.aria-invalid]="form.controls.detalles.invalid && form.controls.detalles.touched || null"
                     [class.invalid]="form.controls.detalles.touched && form.controls.detalles.invalid"></textarea>
-          <div class="error" *ngIf="form.controls.detalles.touched && form.controls.detalles.invalid">Requerido</div>
+          @if (form.controls.detalles.touched && form.controls.detalles.invalid) {
+            <div class="error">Requerido</div>
+          }
         </div>
       </div>
 
       <div class="actions">
-        <button class="btn primary" type="submit" [disabled]="form.invalid || loadingReg()" aria-label="Guardar trámite">
-          <span *ngIf="!loadingReg()">Guardar</span>
-          <span *ngIf="loadingReg()" class="inline-spinner" aria-hidden="true"></span>
+        <button class="btn primary"
+                type="submit"
+                [disabled]="form.invalid || loadingReg()"
+                aria-label="Guardar trámite">
+          @if (!loadingReg()) { <span>Guardar</span> }
+          @if (loadingReg()) { <span class="inline-spinner" aria-hidden="true"></span> }
         </button>
         <button class="btn outline" type="button" (click)="limpiarForm()">Limpiar</button>
       </div>
 
-      <div *ngIf="mensajeRegistro()" class="alert" role="status" aria-live="polite">{{ mensajeRegistro() }}</div>
+      @if (mensajeRegistro()) {
+        <div class="alert" role="status" aria-live="polite">{{ mensajeRegistro() }}</div>
+      }
     </form>
   </section>
 
@@ -71,54 +103,72 @@
              type="text"
              placeholder="Nombre / Apellido / DNI"
              [value]="filtroPersonas()"
-             (input)="onFiltroChange($any($event.target).value)"
+             (input)="onFiltroChange($event.target.value)"
              (keydown)="personasKeydown($event)"
-             aria-controls="listaPersonas" />
+             aria-controls="listaPersonas"
+             autocomplete="off" />
     </div>
 
-    <div *ngIf="personasLoading()" class="loading" aria-live="polite">
-      <span class="inline-spinner" aria-hidden="true"></span> Cargando personas...
-    </div>
-    <div *ngIf="personasError()" class="alert error" role="alert">{{ personasError() }}</div>
+    @if (personasLoading()) {
+      <div class="loading" aria-live="polite">
+        <span class="inline-spinner" aria-hidden="true"></span> Cargando personas...
+      </div>
+    }
+    @if (personasError()) {
+      <div class="alert error" role="alert">{{ personasError() }}</div>
+    }
 
-    <ul id="listaPersonas" class="person-list" role="listbox" [attr.aria-busy]="personasLoading()">
-      <li *ngFor="let p of personasPagina(); let i = index; trackBy: trackPersona"
-          role="option"
-          [attr.aria-selected]="personaSeleccionada()?.idPersona === p.idPersona"
-          class="person-item"
-          [class.selected]="personaSeleccionada()?.idPersona === p.idPersona"
-          [class.active]="tecladoIndex() === i"
-          (click)="seleccionarPersona(p)">
-        <span class="person-name">{{ p.nombre }} {{ p.apellido }}</span>
-        <span class="person-dni">DNI: {{ p.dni }}</span>
-        <span *ngIf="p.telefono" class="person-tel">Tel: {{ p.telefono }}</span>
-      </li>
-      <li *ngIf="!personasPagina().length && !personasLoading()" class="empty">No hay resultados</li>
+    <ul id="listaPersonas"
+        class="person-list"
+        role="listbox"
+        [attr.aria-busy]="personasLoading()"
+        [attr.aria-label]="'Listado de personas filtradas'">
+      @for (p of personasPagina(); track p.idPersona; let i = $index) {
+        <li role="option"
+            class="person-item"
+            [class.selected]="personaSeleccionada()?.idPersona === p.idPersona"
+            [class.active]="tecladoIndex() === i"
+            (click)="seleccionarPersona(p)"
+            [attr.aria-selected]="personaSeleccionada()?.idPersona === p.idPersona"
+            [id]="'persona-'+p.idPersona">
+          <span class="person-name">{{ p.nombre }} {{ p.apellido }}</span>
+          <span class="person-dni">DNI: {{ p.dni }}</span>
+          @if (p.telefono) {
+            <span class="person-tel">Tel: {{ p.telefono }}</span>
+          }
+        </li>
+      }
+      @if (!personasPagina().length && !personasLoading()) {
+        <li class="empty" aria-live="polite">No hay resultados</li>
+      }
     </ul>
 
-    <!-- Paginador ABAJO -->
-    <div class="pagination-toolbar pagination-bottom" *ngIf="personasFiltradas().length">
-      <nav class="pager" aria-label="Paginación personas">
-        <button class="btn small ghost"
-                (click)="changePage(-1)"
-                [disabled]="currentPage() === 1"
-                aria-label="Página anterior">‹</button>
-        <span class="pager-info">Página {{ currentPage() }} de {{ totalPages() }}</span>
-        <button class="btn small ghost"
-                (click)="changePage(1)"
-                [disabled]="currentPage() === totalPages()"
-                aria-label="Página siguiente">›</button>
-      </nav>
-      <div class="page-size">
-        <label for="selSize" class="visually-hidden">Elementos por página</label>
-        <select id="selSize"
-                [value]="pageSize()"
-                (change)="setPageSize(+($any($event.target).value))"
-                aria-label="Elementos por página">
-          <option *ngFor="let opt of pageSizeOptions" [value]="opt">{{ opt }}/pág.</option>
-        </select>
+    @if (personasFiltradas().length) {
+      <div class="pagination-toolbar pagination-bottom">
+        <nav class="pager" aria-label="Paginación personas">
+          <button class="btn small ghost"
+                  (click)="changePage(-1)"
+                  [disabled]="currentPage() === 1"
+                  aria-label="Página anterior">‹</button>
+          <span class="pager-info">Página {{ currentPage() }} de {{ totalPages() }}</span>
+          <button class="btn small ghost"
+                  (click)="changePage(1)"
+                  [disabled]="currentPage() === totalPages()"
+                  aria-label="Página siguiente">›</button>
+        </nav>
+        <div class="page-size">
+          <label for="selSize" class="visually-hidden">Elementos por página</label>
+          <select id="selSize"
+                  [value]="pageSize()"
+                  (change)="setPageSize(+($any($event.target).value))"
+                  aria-label="Elementos por página">
+            @for (opt of pageSizeOptions; track opt) {
+              <option [value]="opt">{{ opt }}/pág.</option>
+            }
+          </select>
+        </div>
       </div>
-    </div>
+    }
   </section>
 
   <!-- TRÁMITES -->
@@ -129,63 +179,84 @@
       </h2>
       <div class="toolbar">
         <label class="check">
-          <input type="checkbox" [checked]="mostrarCompletados()" (change)="toggleCompletados()" />
+          <input type="checkbox"
+                 [checked]="mostrarCompletados()"
+                 (change)="toggleCompletados()" />
           Mostrar completados
         </label>
-        <button class="btn ghost small" (click)="refrescarTramites()" [disabled]="cargandoTramites()" aria-label="Refrescar trámites">⟳</button>
+        <button class="btn ghost small"
+                (click)="refrescarTramites()"
+                [disabled]="cargandoTramites()"
+                aria-label="Refrescar trámites">⟳</button>
       </div>
     </div>
 
-    <div *ngIf="!personaSeleccionada()" class="placeholder" aria-live="polite">
-      Selecciona una persona para ver sus trámites.
-    </div>
-
-    <div *ngIf="cargandoTramites()" class="loading" aria-live="polite">
-      <span class="inline-spinner" aria-hidden="true"></span> Cargando trámites...
-    </div>
-
-    <div *ngIf="personaSeleccionada() && !cargandoTramites() && tramitesFiltrados().length"
-         class="table-wrapper table-wrapper--wide fade-in">
-      <div class="table-scroll">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th class="col-id">ID</th>
-              <th class="col-exp">Expediente</th>
-              <th class="col-desc">Descripción</th>
-              <th class="col-inicio">Inicio</th>
-              <th class="col-fin">Fin</th>
-              <th class="col-estado">Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let t of tramitesFiltrados(); trackBy: trackTramite"
-                (click)="abrirDetalles(t.idTramite)" class="row-link" tabindex="0">
-              <td class="col-id">{{ t.idTramite }}</td>
-              <td class="col-exp">{{ t.nroExpediente }}</td>
-              <td class="col-desc">
-                <span class="truncate" [title]="t.descripcion">{{ t.descripcion }}</span>
-              </td>
-              <td class="col-inicio">{{ t.fechaInicio | date:'yyyy-MM-dd' }}</td>
-              <td class="col-fin">{{ t.fechaFin ? (t.fechaFin | date:'yyyy-MM-dd') : '-' }}</td>
-              <td class="col-estado">
-                <span class="status" [class.done]="t.estado" [class.active]="!t.estado">
-                  {{ t.estado ? 'Completado' : 'Activo' }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    @if (!personaSeleccionada()) {
+      <div class="placeholder" aria-live="polite">
+        Selecciona una persona para ver sus trámites.
       </div>
-    </div>
+    }
 
-    <div *ngIf="personaSeleccionada() && !cargandoTramites() && !tramitesFiltrados().length" class="placeholder">
-      No hay trámites para mostrar con el filtro actual.
-    </div>
+    @if (cargandoTramites()) {
+      <div class="loading" aria-live="polite">
+        <span class="inline-spinner" aria-hidden="true"></span> Cargando trámites...
+      </div>
+    }
+
+    @if (personaSeleccionada() && !cargandoTramites() && tramitesFiltrados().length) {
+      <div class="table-wrapper table-wrapper--wide fade-in">
+        <div class="table-scroll">
+          <table class="data-table" role="table">
+            <caption class="visually-hidden">Listado de trámites de la persona seleccionada</caption>
+            <thead>
+              <tr>
+                <th scope="col" class="col-id">ID</th>
+                <th scope="col" class="col-exp">Expediente</th>
+                <th scope="col" class="col-desc">Descripción</th>
+                <th scope="col" class="col-inicio">Inicio</th>
+                <th scope="col" class="col-fin">Fin</th>
+                <th scope="col" class="col-estado">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (t of tramitesFiltrados(); track t.idTramite) {
+                <tr (click)="abrirDetalles(t.idTramite)"
+                    class="row-link"
+                    tabindex="0"
+                    (keydown.enter)="abrirDetalles(t.idTramite)">
+                  <td class="col-id">{{ t.idTramite }}</td>
+                  <td class="col-exp">{{ t.nroExpediente }}</td>
+                  <td class="col-desc">
+                    <span class="truncate" [title]="t.descripcion">{{ t.descripcion }}</span>
+                  </td>
+                  <td class="col-inicio">{{ t.fechaInicio | date:'yyyy-MM-dd' }}</td>
+                  <td class="col-fin">{{ t.fechaFin ? (t.fechaFin | date:'yyyy-MM-dd') : '-' }}</td>
+                  <td class="col-estado">
+                    <span class="status"
+                          [class.status--completado]="t.estado"
+                          [class.status--activo]="!t.estado">
+                      {{ t.estado ? 'Completado' : 'Activo' }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    @if (personaSeleccionada() && !cargandoTramites() && !tramitesFiltrados().length) {
+      <div class="placeholder">
+        No hay trámites para mostrar con el filtro actual.
+      </div>
+    }
   </section>
 </main>
 
-<!-- Botón logout fijo esquina inferior derecha -->
-<button class="btn danger btn-logout" (click)="logout()" aria-label="Cerrar sesión" title="Cerrar sesión">
+<button class="btn danger btn-logout"
+        (click)="logout()"
+        aria-label="Cerrar sesión"
+        title="Cerrar sesión">
   <span>Salir</span>
 </button>

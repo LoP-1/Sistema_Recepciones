@@ -1,16 +1,17 @@
 <header class="modal-header">
   <h2 class="modal-title">Agregar Detalles / Evidencias</h2>
-  <button type="button" class="btn icon only" (click)="cerrar()" aria-label="Cerrar">✕</button>
+  <button type="button" class="btn icon only ghost" (click)="cerrar()" aria-label="Cerrar">✕</button>
 </header>
 
 <div class="modal-body layout-wide">
-  <!-- COLUMNA IZQUIERDA: FORMULARIO -->
+  <!-- Columna Izquierda -->
   <form [formGroup]="form" (ngSubmit)="guardar()" class="form" novalidate>
-    <!-- Tipo -->
     <div class="field">
-      <label for="fTipoProceso">Tipo Proceso <span class="req">*</span></label>
-      <select id="fTipoProceso" formControlName="tipoProceso"
-              [class.invalid]="form.controls.tipoProceso.touched && form.controls.tipoProceso.invalid">
+      <label for="fTipoProceso">Tipo Proceso <span class="req" aria-hidden="true">*</span></label>
+      <select id="fTipoProceso"
+              formControlName="tipoProceso"
+              [class.invalid]="form.controls.tipoProceso.touched && form.controls.tipoProceso.invalid"
+              [attr.aria-invalid]="form.controls.tipoProceso.touched && form.controls.tipoProceso.invalid || null">
         @for (t of tiposProceso; track t) {
           <option [value]="t">{{ t }}</option>
         }
@@ -20,23 +21,27 @@
       }
     </div>
 
-    <!-- Detalles -->
     <div class="field">
-      <label for="fDetalles">Detalles / Descripción <span class="req">*</span></label>
-      <textarea id="fDetalles" rows="4" formControlName="detalles"
+      <label for="fDetalles">Detalles / Descripción <span class="req" aria-hidden="true">*</span></label>
+      <textarea id="fDetalles"
+                rows="4"
+                formControlName="detalles"
                 placeholder="Ej: Se adjunta boleta escaneada..."
-                [class.invalid]="form.controls.detalles.touched && form.controls.detalles.invalid"></textarea>
+                [class.invalid]="form.controls.detalles.touched && form.controls.detalles.invalid"
+                [attr.aria-invalid]="form.controls.detalles.touched && form.controls.detalles.invalid || null"></textarea>
       @if (form.controls.detalles.touched && form.controls.detalles.invalid) {
         <div class="error">Mínimo 5 caracteres</div>
       }
     </div>
 
-    <!-- Upload -->
     <div class="upload-block">
       <h3 class="section-title">Adjuntar Archivo (Opcional)</h3>
-      <div class="drop-wrapper" fileDrop (fileDropped)="onFileDropped($event)">
+      <div class="drop-wrapper"
+           fileDrop
+           (fileDropped)="onFileDropped($event)"
+           [class.loading]="cargando()">
         @if (!archivo()) {
-          <p class="drop-icon">📎</p>
+          <p class="drop-icon" aria-hidden="true">📎</p>
           <p class="drop-text">Arrastra y suelta aquí o</p>
           <label class="btn outline small">
             Seleccionar archivo
@@ -51,14 +56,12 @@
             <strong class="file-name">{{ archivo()!.nombre }}</strong>
             <small class="file-meta">{{ archivo()!.tipo }} - {{ archivo()!.tamanoKb }} KB</small>
 
-            <!-- Imagen -->
             @if (archivo()!.esImagen && archivo()!.base64) {
               <div class="img-preview">
                 <img [src]="archivo()!.base64" alt="Vista previa imagen" />
               </div>
             }
 
-            <!-- PDF -->
             @if (archivo()!.tipo === 'application/pdf') {
               <div class="pdf-inline-wrapper">
                 @if (!archivo()!.cargaFallida) {
@@ -66,10 +69,8 @@
                           [src]="archivo()!.safeUrl"
                           title="Vista previa PDF"
                           (error)="marcarIframeError()"
-                          (load)="logExitoPDF()">
-                  </iframe>
-                }
-                @if (archivo()!.cargaFallida) {
+                          (load)="logExitoPDF()"></iframe>
+                } @else {
                   <div class="pdf-fallback">
                     No se puede mostrar el PDF embebido.
                     <button type="button" class="btn outline small" (click)="abrirEnNuevaPestana()">Abrir</button>
@@ -82,9 +83,8 @@
               </div>
             }
 
-            <!-- Otro tipo genérico -->
             @if (!archivo()!.esImagen && archivo()!.tipo !== 'application/pdf') {
-              <div class="file-generic">📄</div>
+              <div class="file-generic" aria-hidden="true">📄</div>
               <button type="button" class="btn outline small" (click)="abrirEnNuevaPestana()">Abrir / Descargar</button>
             }
 
@@ -104,24 +104,30 @@
     </div>
 
     @if (mensaje()) {
-      <div class="alert" [class.error]="esError()" role="status" aria-live="polite">
-        @if (esError()) { <span>⚠️</span> } @else { <span>✅</span> }
+      <div class="alert"
+           [class.error]="esError()"
+           [class.success]="!esError()"
+           role="status"
+           aria-live="polite">
+        @if (esError()) { <span aria-hidden="true">⚠️</span> } @else { <span aria-hidden="true">✅</span> }
         {{ mensaje() }}
       </div>
     }
   </form>
 
-  <!-- COLUMNA DERECHA: TIMELINE Y BOTONES -->
+  <!-- Columna Derecha -->
   <section class="timeline">
     <h3 class="section-title">Línea de tiempo</h3>
+
     @if (cargandoHistorial()) {
-      <div class="loading-inline">
-        <span class="inline-spinner"></span> Cargando historial...
+      <div class="loading-inline" aria-live="polite">
+        <span class="inline-spinner" aria-hidden="true"></span> Cargando historial...
       </div>
     }
+
     @if (!cargandoHistorial() && historial().length) {
       <ul class="timeline-list">
-        @for (item of historial(); track item) {
+        @for (item of historial(); track item.id) {
           <li class="timeline-item">
             <div class="timeline-row">
               <div class="timeline-date">
@@ -150,31 +156,40 @@
         }
       </ul>
     }
+
     @if (!cargandoHistorial() && !historial().length) {
       <p class="empty">Sin historial de procesos.</p>
     }
 
-    <!-- BOTONES A LA DERECHA -->
     <div class="form-actions vertical-actions">
-      <button type="button" class="btn primary" [disabled]="form.invalid || cargando()" (click)="guardar()">
+      <button type="button"
+              class="btn primary"
+              [disabled]="form.invalid || cargando()"
+              (click)="guardar()">
         @if (!cargando()) { Guardar }
         @if (cargando()) { <span class="inline-spinner"></span> }
       </button>
-      <button type="button" class="btn outline" (click)="limpiarTodo()" [disabled]="cargando()">Limpiar</button>
-      <button type="button" class="btn outline"
+      <button type="button"
+              class="btn outline"
+              (click)="limpiarTodo()"
+              [disabled]="cargando()">Limpiar</button>
+      <button type="button"
+              class="btn warn"
               [disabled]="form.controls.tipoProceso.invalid || cargandoFinalizar()"
               (click)="finalizarTramiteClick()">
         @if (!cargandoFinalizar()) { Finalizar Trámite }
         @if (cargandoFinalizar()) { <span class="inline-spinner"></span> }
       </button>
-      <button type="button" class="btn finalizar" (click)="cerrar()">Cerrar</button>
+      <button type="button"
+              class="btn success"
+              (click)="cerrar()">Cerrar</button>
     </div>
   </section>
 </div>
 
 <!-- Super Preview -->
 @if (superPreviewVisible()) {
-  <div class="super-overlay" role="dialog" aria-label="Vista ampliada">
+  <div class="super-overlay" role="dialog" aria-label="Vista ampliada de archivo">
     <div class="super-bar">
       <span class="title">{{ archivo()?.nombre }}</span>
       <div class="actions">
