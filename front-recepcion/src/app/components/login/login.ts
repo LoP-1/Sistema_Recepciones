@@ -1,3 +1,6 @@
+// Componente de login para autenticación de usuario por DNI y contraseña.
+// Maneja validación, solicitudes al backend y almacenamiento de token.
+
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -12,11 +15,12 @@ import { environment } from '../../../environments/environments';
   imports: [ReactiveFormsModule]
 })
 export class Login {
-  loading = false;
-  error = '';
+  loading = false;  // Estado de carga al enviar el formulario
+  error = '';       // Mensaje de error para feedback al usuario
 
   private baseUrl = `${environment.apiUrl}/encargado`;
 
+  // Formulario reactivo de login
   loginForm;
 
   constructor(
@@ -30,6 +34,7 @@ export class Login {
     });
   }
 
+  // Envía los datos del login al backend y maneja la respuesta
   submit() {
     this.error = '';
     this.loading = true;

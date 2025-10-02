@@ -1,3 +1,4 @@
+// Definición de rutas principales y protección con guardia de autenticación
 import { Routes } from '@angular/router';
 import { Dashboard } from './components/dashboard/dashboard';
 import { AgregarDetallesTramite } from './components/detalles/detalles';

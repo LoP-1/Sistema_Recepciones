@@ -1,11 +1,14 @@
+<!-- Modal de detalles y evidencias para trámite -->
+
 <header class="modal-header">
   <h2 class="modal-title">Agregar Detalles / Evidencias</h2>
   <button type="button" class="btn icon only ghost" (click)="cerrar()" aria-label="Cerrar">✕</button>
 </header>
 
 <div class="modal-body layout-wide">
-  <!-- Columna Izquierda -->
+  <!-- Columna izquierda: Formulario para agregar detalles y archivo adjunto -->
   <form [formGroup]="form" (ngSubmit)="guardar()" class="form" novalidate>
+    <!-- Selección de tipo de proceso -->
     <div class="field">
       <label for="fTipoProceso">Tipo Proceso <span class="req" aria-hidden="true">*</span></label>
       <select id="fTipoProceso"
@@ -21,6 +24,7 @@
       }
     </div>
 
+    <!-- Descripción del proceso -->
     <div class="field">
       <label for="fDetalles">Detalles / Descripción <span class="req" aria-hidden="true">*</span></label>
       <textarea id="fDetalles"
@@ -34,6 +38,7 @@
       }
     </div>
 
+    <!-- Subida de archivos adjuntos -->
     <div class="upload-block">
       <h3 class="section-title">Adjuntar Archivo (Opcional)</h3>
       <div class="drop-wrapper"
@@ -52,16 +57,19 @@
           </label>
           <p class="help">Máx {{ (maxSizeBytes / (1024*1024)).toFixed(1) }} MB</p>
         } @else {
+          <!-- Vista previa del archivo adjunto -->
           <div class="file-preview">
             <strong class="file-name">{{ archivo()!.nombre }}</strong>
             <small class="file-meta">{{ archivo()!.tipo }} - {{ archivo()!.tamanoKb }} KB</small>
 
+            <!-- Imagen adjunta -->
             @if (archivo()!.esImagen && archivo()!.base64) {
               <div class="img-preview">
                 <img [src]="archivo()!.base64" alt="Vista previa imagen" />
               </div>
             }
 
+            <!-- PDF adjunto -->
             @if (archivo()!.tipo === 'application/pdf') {
               <div class="pdf-inline-wrapper">
                 @if (!archivo()!.cargaFallida) {
@@ -83,11 +91,13 @@
               </div>
             }
 
+            <!-- Archivos genéricos -->
             @if (!archivo()!.esImagen && archivo()!.tipo !== 'application/pdf') {
               <div class="file-generic" aria-hidden="true">📄</div>
               <button type="button" class="btn outline small" (click)="abrirEnNuevaPestana()">Abrir / Descargar</button>
             }
 
+            <!-- Acciones sobre el archivo adjunto -->
             <div class="file-actions">
               <button type="button" class="btn danger" (click)="quitarArchivo()">Quitar</button>
               <label class="btn outline small">
@@ -103,6 +113,7 @@
       </div>
     </div>
 
+    <!-- Mensaje de resultado de la acción -->
     @if (mensaje()) {
       <div class="alert"
            [class.error]="esError()"
@@ -115,16 +126,18 @@
     }
   </form>
 
-  <!-- Columna Derecha -->
+  <!-- Columna derecha: Línea de tiempo del trámite -->
   <section class="timeline">
     <h3 class="section-title">Línea de tiempo</h3>
 
+    <!-- Cargando historial -->
     @if (cargandoHistorial()) {
       <div class="loading-inline" aria-live="polite">
         <span class="inline-spinner" aria-hidden="true"></span> Cargando historial...
       </div>
     }
 
+    <!-- Listado del historial -->
     @if (!cargandoHistorial() && historial().length) {
       <ul class="timeline-list">
         @for (item of historial(); track item.id) {
@@ -157,10 +170,12 @@
       </ul>
     }
 
+    <!-- No hay historial -->
     @if (!cargandoHistorial() && !historial().length) {
       <p class="empty">Sin historial de procesos.</p>
     }
 
+    <!-- Botones de acción para la gestión del proceso -->
     <div class="form-actions vertical-actions">
       <button type="button"
               class="btn primary"
@@ -187,7 +202,7 @@
   </section>
 </div>
 
-<!-- Super Preview -->
+<!-- Modal de vista ampliada de archivo adjunto -->
 @if (superPreviewVisible()) {
   <div class="super-overlay" role="dialog" aria-label="Vista ampliada de archivo">
     <div class="super-bar">
@@ -200,9 +215,11 @@
       </div>
     </div>
     <div class="super-content">
+      <!-- Imagen ampliada -->
       @if (archivo()?.esImagen && archivo()?.base64) {
         <img class="super-img" [src]="archivo()!.base64" alt="Imagen ampliada" />
       }
+      <!-- PDF ampliado -->
       @if (archivo()?.tipo === 'application/pdf') {
         @if (!archivo()?.cargaFallida) {
           <iframe class="super-pdf-frame"
@@ -216,6 +233,7 @@
           </div>
         }
       }
+      <!-- Archivo genérico ampliado -->
       @if (!archivo()?.esImagen && archivo()?.tipo !== 'application/pdf') {
         <p class="fallback-generic">
           Archivo: {{ archivo()?.nombre }}<br />

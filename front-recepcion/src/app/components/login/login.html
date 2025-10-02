@@ -1,3 +1,4 @@
+<!-- Pantalla de inicio de sesión para acceder al sistema de trámites -->
 <div class="auth-container fade-in">
   <div class="auth-card">
     <div class="auth-header">
@@ -8,17 +9,21 @@
       </p>
     </div>
     <form [formGroup]="loginForm" (ngSubmit)="submit()">
+      <!-- Campo DNI -->
       <div class="input-group">
         <label for="dni">DNI</label>
         <input id="dni" type="text" formControlName="dni" placeholder="Tu DNI" autocomplete="username" />
       </div>
+      <!-- Campo Contraseña -->
       <div class="input-group">
         <label for="password">Contraseña</label>
         <input id="password" type="password" formControlName="password" placeholder="Contraseña" autocomplete="current-password" />
       </div>
+      <!-- Mensaje de error si las credenciales no son válidas -->
       @if (error) {
         <div class="error">{{ error }}</div>
       }
+      <!-- Botón para enviar el formulario -->
       <button type="submit" [disabled]="loading" class="main-btn">
         @if (loading) {
           <span class="loader"></span>
@@ -26,6 +31,7 @@
         Entrar
       </button>
     </form>
+    <!-- Nota para solicitar acceso administrativo -->
     <p class="admin-access">
       ¿Necesitas acceso? <br> Contacta con un administrador.
     </p>

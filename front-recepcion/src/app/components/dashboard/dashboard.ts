@@ -9,6 +9,7 @@ import { Persona } from '../../models/persona';
 import { AgregarDetallesTramite } from '../detalles/detalles';
 import { ModalService } from '../../shared/ui/modal/modal.service';
 
+// Dashboard principal para la gestión de trámites y personas
 @Component({
   standalone: true,
   selector: 'app-dashboard',
@@ -17,41 +18,47 @@ import { ModalService } from '../../shared/ui/modal/modal.service';
   styleUrl: './dashboard.css'
 })
 export class Dashboard implements AfterViewInit {
+  // Servicios y utilidades de Angular
   private fb = inject(FormBuilder);
   private personaService = inject(PersonaService);
   private tramiteService = inject(TramiteService);
   private modal = inject(ModalService);
 
+  // Referencia al campo de expediente para manejar el foco
   @ViewChild('expedienteInput') expedienteInput!: ElementRef<HTMLInputElement>;
 
+  // Formulario reactivo para registrar trámites
   form = this.fb.nonNullable.group({
     nombre: ['', Validators.required],
     dni: ['', Validators.required],
     telefono: ['', Validators.required],
     expediente: ['', Validators.required],
     detalles: ['', Validators.required],
-    // dniEncargado eliminado del formulario
   });
 
+  // Estado y feedback de registro de trámite
   mensajeRegistro = signal('');
   loadingReg = signal(false);
 
+  // Listado y filtro de personas
   personas = signal<Persona[]>([]);
   filtroPersonas = signal('');
   personasLoading = signal(false);
   personasError = signal('');
   personaSeleccionada = signal<Persona | null>(null);
 
+  // Listado y estado de trámites por persona seleccionada
   tramites = signal<Tramite[]>([]);
   cargandoTramites = signal(false);
   mostrarCompletados = signal(false);
   tecladoIndex = signal(-1);
 
-  // Paginación
+  // Configuración de paginación
   pageSizeOptions = [5, 10, 20, 50];
   pageSize = signal(10);
   currentPage = signal(1);
 
+  // Personas filtradas por búsqueda
   personasFiltradas = computed(() => {
     const term = this.filtroPersonas().toLowerCase().trim();
     const base = this.personas();
@@ -62,10 +69,12 @@ export class Dashboard implements AfterViewInit {
     );
   });
 
+  // Cálculo de páginas para la paginación
   totalPages = computed(() =>
     Math.max(1, Math.ceil(this.personasFiltradas().length / this.pageSize()))
   );
 
+  // Personas a mostrar en la página actual
   personasPagina = computed(() => {
     const ps = this.pageSize();
     let page = this.currentPage();
@@ -75,14 +84,17 @@ export class Dashboard implements AfterViewInit {
     return this.personasFiltradas().slice(start, start + ps);
   });
 
+  // Trámites filtrados según el estado
   tramitesFiltrados = computed(() =>
     this.mostrarCompletados() ? this.tramites() : this.tramites().filter(t => !t.estado)
   );
 
+  // Cargar personas al inicializar el componente
   ngAfterViewInit() {
     this.cargarPersonas();
   }
 
+  // Descarga listado de personas desde el backend
   cargarPersonas() {
     this.personasLoading.set(true);
     this.personasError.set('');
@@ -96,17 +108,20 @@ export class Dashboard implements AfterViewInit {
     });
   }
 
+  // Actualiza filtro de personas y reinicia paginación
   onFiltroChange(v: string) {
     this.filtroPersonas.set(v);
     this.resetPaginationAfterFilter();
   }
 
+  // Reinicia la página y el índice del teclado tras filtrar
   resetPaginationAfterFilter() {
     this.currentPage.set(1);
     const list = this.personasFiltradas();
     this.tecladoIndex.set(list.length ? 0 : -1);
   }
 
+  // Cambia de página en la paginación de personas
   changePage(delta: number) {
     const next = this.currentPage() + delta;
     if (next < 1 || next > this.totalPages()) return;
@@ -114,12 +129,14 @@ export class Dashboard implements AfterViewInit {
     this.tecladoIndex.set(this.personasPagina().length ? 0 : -1);
   }
 
+  // Cambia la cantidad de elementos por página
   setPageSize(size: number) {
     this.pageSize.set(size);
     this.currentPage.set(1);
     this.tecladoIndex.set(this.personasPagina().length ? 0 : -1);
   }
 
+  // Selecciona una persona y carga sus trámites
   seleccionarPersona(p: Persona, focusExpediente = true) {
     this.personaSeleccionada.set(p);
     this.form.patchValue({
@@ -133,6 +150,7 @@ export class Dashboard implements AfterViewInit {
     }
   }
 
+  // Navegación con teclado en el listado de personas
   personasKeydown(ev: KeyboardEvent) {
     const list = this.personasPagina();
     if (!list.length) return;
@@ -153,6 +171,7 @@ export class Dashboard implements AfterViewInit {
     }
   }
 
+  // Descarga trámites vinculados al DNI actual
   cargarTramitesPorDni() {
     const dni = this.form.value.dni;
     if (!dni) return;
@@ -164,10 +183,12 @@ export class Dashboard implements AfterViewInit {
     });
   }
 
+  // Refresca trámites del usuario seleccionado
   refrescarTramites() {
     if (this.personaSeleccionada()) this.cargarTramitesPorDni();
   }
 
+  // Envía el formulario para registrar un nuevo trámite
   registrar() {
     if (this.form.invalid) {
       this.focusFirstInvalid();
@@ -194,6 +215,7 @@ export class Dashboard implements AfterViewInit {
     });
   }
 
+  // Limpia el formulario, restaurando datos si hay una persona seleccionada
   limpiarForm() {
     const p = this.personaSeleccionada();
     this.form.reset({
@@ -202,22 +224,25 @@ export class Dashboard implements AfterViewInit {
       telefono: p?.telefono || '',
       expediente: '',
       detalles: ''
-      // dniEncargado eliminado
     });
   }
 
+  // Cierra sesión y recarga la app
   logout() {
     localStorage.clear();
     location.reload();
   }
 
+  // Alterna entre mostrar trámites activos o completados
   toggleCompletados() {
     this.mostrarCompletados.set(!this.mostrarCompletados());
   }
 
+  // Trackers para optimizar renderizado de listas
   trackPersona = (_: number, p: Persona) => p.idPersona;
   trackTramite = (_: number, t: Tramite) => t.idTramite;
 
+  // Enfoca el primer campo inválido del formulario
   private focusFirstInvalid() {
     const key = Object.keys(this.form.controls).find(k => (this.form.controls as any)[k].invalid);
     if (!key) return;
@@ -225,6 +250,7 @@ export class Dashboard implements AfterViewInit {
     el?.focus();
   }
 
+  // Abre el modal para agregar detalles a un trámite
   abrirDetalles(idTramite: number) {
     this.modal.open(AgregarDetallesTramite, {
       data: { idTramite },

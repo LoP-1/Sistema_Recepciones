@@ -4,7 +4,7 @@
 </header>
 
 <main id="mainContent" class="layout" tabindex="-1">
-  <!-- FORMULARIO -->
+  <!-- Registro de trámites: formulario principal -->
   <section class="card form-zone" aria-labelledby="tituloForm">
     <div class="card-header">
       <h2 id="tituloForm" class="card-title">Registrar Trámite</h2>
@@ -12,6 +12,7 @@
 
     <form [formGroup]="form" (ngSubmit)="registrar()" novalidate class="v-form" autocomplete="off">
       <div class="field-grid">
+        <!-- Campo: Nombre -->
         <div class="field">
           <label for="fNombre">Nombre <span class="req" aria-hidden="true">*</span></label>
           <input id="fNombre"
@@ -23,7 +24,7 @@
             <div class="error" id="errNombre">Requerido</div>
           }
         </div>
-
+        <!-- Campo: DNI -->
         <div class="field">
           <label for="fDni">DNI <span class="req" aria-hidden="true">*</span></label>
             <input id="fDni"
@@ -36,7 +37,7 @@
             <div class="error" id="errDni">Requerido</div>
           }
         </div>
-
+        <!-- Campo: Teléfono -->
         <div class="field">
           <label for="fTelefono">Teléfono <span class="req" aria-hidden="true">*</span></label>
           <input id="fTelefono"
@@ -48,7 +49,7 @@
             <div class="error">Requerido</div>
           }
         </div>
-
+        <!-- Campo: Expediente -->
         <div class="field">
           <label for="fExpediente">N° Expediente <span class="req" aria-hidden="true">*</span></label>
           <input id="fExpediente"
@@ -60,7 +61,7 @@
             <div class="error">Requerido</div>
           }
         </div>
-
+        <!-- Campo: Detalles -->
         <div class="field field-span-2">
           <label for="fDetalles">Descripción / Detalles <span class="req" aria-hidden="true">*</span></label>
           <textarea id="fDetalles"
@@ -91,7 +92,7 @@
     </form>
   </section>
 
-  <!-- PERSONAS -->
+  <!-- Listado de personas con filtro y paginación -->
   <section class="card people-zone" aria-labelledby="tituloPersonas">
     <div class="card-header">
       <h2 id="tituloPersonas" class="card-title">Personas</h2>
@@ -171,7 +172,7 @@
     }
   </section>
 
-  <!-- TRÁMITES -->
+  <!-- Tabla de trámites por persona seleccionada -->
   <section class="card tramite-zone" aria-labelledby="tituloTramites">
     <div class="card-header">
       <h2 id="tituloTramites" class="card-title">
@@ -254,6 +255,7 @@
   </section>
 </main>
 
+<!-- Botón de cierre de sesión -->
 <button class="btn danger btn-logout"
         (click)="logout()"
         aria-label="Cerrar sesión"

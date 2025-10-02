@@ -1,3 +1,6 @@
+// Componente para agregar detalles, evidencias y gestionar el historial de un trámite.
+// Incluye subida de archivos, vista previa (imagen/PDF), descarga y finalización del trámite.
+
 import {
   Component,
   inject,
@@ -25,6 +28,7 @@ import { MODAL_DATA } from '../../shared/ui/modal/modal.tokens';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { environment } from '../../../environments/environments';
 
+// Estructura para manejar la vista previa y datos del archivo adjunto
 interface ArchivoPreview {
   file: File;
   nombre: string;
@@ -51,14 +55,16 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
   private modalRef = inject(ModalRef<AgregarDetallesTramite>);
   private sanitizer = inject(DomSanitizer);
 
+  // Tipos de proceso que puede agregar el usuario
   tiposProceso = ['Seguimiento','Llamada','Verificación','Adjunto','Observación'];
 
+  // Formulario reactivo para detalles del proceso
   form = this.fb.nonNullable.group({
-    // idTramite eliminado del form visual, pero sigue en el modelo
     tipoProceso: ['Seguimiento', Validators.required],
     detalles: ['', [Validators.required, Validators.minLength(5)]]
   });
 
+  // Estado y datos del archivo adjunto
   archivo = signal<ArchivoPreview | null>(null);
 
   cargando = signal(false);
@@ -66,6 +72,7 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
   esError  = signal(false);
   maxSizeBytes = 5 * 1024 * 1024;
 
+  // Historial de procesos para el trámite
   historial = signal<HistorialProceso[]>([]);
   cargandoHistorial = signal(false);
   cargandoFinalizar  = signal(false);
@@ -76,16 +83,19 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
 
   private idTramite = 0;
 
+  // Obtiene el id del trámite desde el modal
   constructor(@Inject(MODAL_DATA) public data: { idTramite?: number } | null) {
     if (data?.idTramite) {
       this.idTramite = data.idTramite;
     }
   }
 
+  // Al montar el componente, carga el historial
   ngOnInit() {
     this.cargarHistorial();
   }
 
+  // Al destruir el componente, libera URL de archivos temporales
   ngOnDestroy() {
     this.revokeObjectUrl();
   }
@@ -94,7 +104,7 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
     this.modalRef.close();
   }
 
-  // ------------------ Historial ------------------
+  // --- HISTORIAL ---
   cargarHistorial() {
     const id = this.idTramite;
     if (id > 0) {
@@ -109,7 +119,7 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
     }
   }
 
-  // ------------------ Archivo ------------------
+  // --- ARCHIVOS ---
   onFileInputChange(ev: Event) {
     const input = ev.target as HTMLInputElement;
     if (input.files?.length) {
@@ -122,6 +132,7 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
     if (list.length) this.procesarArchivo(list[0]);
   }
 
+  // Procesa archivo adjunto y genera vista previa
   private procesarArchivo(file: File) {
     if (file.size > this.maxSizeBytes) {
       this.mensaje.set(`El archivo supera ${(this.maxSizeBytes/1024/1024).toFixed(1)}MB`);
@@ -165,6 +176,7 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
     }
   }
 
+  // Marca que el PDF no se pudo mostrar embebido
   marcarIframeError() {
     const a = this.archivo();
     if (!a) return;
@@ -172,17 +184,20 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
     this.archivo.set({ ...a });
   }
 
+  // Elimina el archivo adjunto y limpia la vista ampliada
   quitarArchivo() {
     this.revokeObjectUrl();
     this.archivo.set(null);
     this.superPreviewVisible.set(false);
   }
 
+  // Libera URLs temporales para archivos
   private revokeObjectUrl() {
     const a = this.archivo();
     if (a?.objectUrl) URL.revokeObjectURL(a.objectUrl);
   }
 
+  // Muestra el archivo en modo ampliado
   abrirSuper() {
     if (this.archivo()) this.superPreviewVisible.set(true);
   }
@@ -190,6 +205,7 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
     this.superPreviewVisible.set(false);
   }
 
+  // Abre el archivo en una nueva pestaña
   abrirEnNuevaPestana() {
     const a = this.archivo();
     if (!a) return;
@@ -200,7 +216,8 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
     }
   }
 
-  // ------------------ Guardar / Finalizar ------------------
+  // --- GUARDAR / FINALIZAR ---
+  // Guarda los detalles del proceso actual
   guardar() {
     if (this.form.invalid) {
       this.focusFirstInvalid();
@@ -235,6 +252,7 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
     });
   }
 
+  // Marca el trámite como finalizado
   finalizarTramiteClick() {
     const id = this.idTramite;
     if (!id || id <= 0) {
@@ -260,6 +278,7 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
     });
   }
 
+  // Limpia el formulario y recarga el historial
   limpiarTodo() {
     this.form.reset({
       tipoProceso: 'Seguimiento',
@@ -271,12 +290,14 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
     this.cargarHistorial();
   }
 
+  // Descarga archivo adjunto del historial
   descargarAdjunto(item: HistorialProceso) {
     if (!item.nombreArchivo) return;
     const url = `${environment.apiUrl}/download/` + encodeURIComponent(item.nombreArchivo);
     window.open(url, '_blank');
   }
 
+  // Enfoca el primer campo inválido del formulario
   private focusFirstInvalid() {
     const invalid = Object.keys(this.form.controls)
       .find(k => (this.form.controls as any)[k].invalid);

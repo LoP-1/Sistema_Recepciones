@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+// Interceptor HTTP para agregar el token JWT a cada solicitud
 import { HttpInterceptorFn } from '@angular/common/http';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
