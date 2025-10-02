@@ -84,6 +84,12 @@
           @if (loadingReg()) { <span class="inline-spinner" aria-hidden="true"></span> }
         </button>
         <button class="btn outline" type="button" (click)="limpiarForm()">Limpiar</button>
+        <button class="btn outline" type="button"
+            (click)="actualizarDatos()"
+            [disabled]="form.controls.nombre.invalid || form.controls.dni.invalid || form.controls.telefono.invalid || loadingActualizar()">
+          @if (!loadingActualizar()) { <span>Actualizar datos</span> }
+          @if (loadingActualizar()) { <span class="inline-spinner" aria-hidden="true"></span> }
+        </button>
       </div>
 
       @if (mensajeRegistro()) {

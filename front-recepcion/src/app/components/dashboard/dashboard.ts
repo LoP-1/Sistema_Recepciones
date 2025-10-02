@@ -1,6 +1,7 @@
 import { Component, inject, signal, computed, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { PersonaService } from '../../services/persona';
 import { TramiteService } from '../../services/tramite';
 import { TramiteDTO } from '../../models/tramite.dto';
@@ -9,7 +10,6 @@ import { Persona } from '../../models/persona';
 import { AgregarDetallesTramite } from '../detalles/detalles';
 import { ModalService } from '../../shared/ui/modal/modal.service';
 
-// Dashboard principal para la gestión de trámites y personas
 @Component({
   standalone: true,
   selector: 'app-dashboard',
@@ -18,16 +18,16 @@ import { ModalService } from '../../shared/ui/modal/modal.service';
   styleUrl: './dashboard.css'
 })
 export class Dashboard implements AfterViewInit {
-  // Servicios y utilidades de Angular
+  // Inyección de servicios y herramientas de Angular
   private fb = inject(FormBuilder);
   private personaService = inject(PersonaService);
   private tramiteService = inject(TramiteService);
   private modal = inject(ModalService);
 
-  // Referencia al campo de expediente para manejar el foco
+  // Referencia de input para enfocar expediente
   @ViewChild('expedienteInput') expedienteInput!: ElementRef<HTMLInputElement>;
 
-  // Formulario reactivo para registrar trámites
+  // Formulario principal de registro/actualización
   form = this.fb.nonNullable.group({
     nombre: ['', Validators.required],
     dni: ['', Validators.required],
@@ -36,29 +36,30 @@ export class Dashboard implements AfterViewInit {
     detalles: ['', Validators.required],
   });
 
-  // Estado y feedback de registro de trámite
+  // Señales para feedback y estados de carga
   mensajeRegistro = signal('');
   loadingReg = signal(false);
+  loadingActualizar = signal(false);
 
-  // Listado y filtro de personas
+  // Listado y filtrado de personas
   personas = signal<Persona[]>([]);
   filtroPersonas = signal('');
   personasLoading = signal(false);
   personasError = signal('');
   personaSeleccionada = signal<Persona | null>(null);
 
-  // Listado y estado de trámites por persona seleccionada
+  // Listado y filtrado de trámites
   tramites = signal<Tramite[]>([]);
   cargandoTramites = signal(false);
   mostrarCompletados = signal(false);
   tecladoIndex = signal(-1);
 
-  // Configuración de paginación
+  // Paginación
   pageSizeOptions = [5, 10, 20, 50];
   pageSize = signal(10);
   currentPage = signal(1);
 
-  // Personas filtradas por búsqueda
+  // Computed para filtro de personas según texto de búsqueda
   personasFiltradas = computed(() => {
     const term = this.filtroPersonas().toLowerCase().trim();
     const base = this.personas();
@@ -69,12 +70,11 @@ export class Dashboard implements AfterViewInit {
     );
   });
 
-  // Cálculo de páginas para la paginación
+  // Computed para total de páginas y personas en página actual
   totalPages = computed(() =>
     Math.max(1, Math.ceil(this.personasFiltradas().length / this.pageSize()))
   );
 
-  // Personas a mostrar en la página actual
   personasPagina = computed(() => {
     const ps = this.pageSize();
     let page = this.currentPage();
@@ -84,17 +84,17 @@ export class Dashboard implements AfterViewInit {
     return this.personasFiltradas().slice(start, start + ps);
   });
 
-  // Trámites filtrados según el estado
+  // Computed para filtrar trámites según estado
   tramitesFiltrados = computed(() =>
     this.mostrarCompletados() ? this.tramites() : this.tramites().filter(t => !t.estado)
   );
 
-  // Cargar personas al inicializar el componente
+  // Carga inicial de personas tras montar la vista
   ngAfterViewInit() {
     this.cargarPersonas();
   }
 
-  // Descarga listado de personas desde el backend
+  // Descarga y refresca listado de personas desde el backend
   cargarPersonas() {
     this.personasLoading.set(true);
     this.personasError.set('');
@@ -114,14 +114,14 @@ export class Dashboard implements AfterViewInit {
     this.resetPaginationAfterFilter();
   }
 
-  // Reinicia la página y el índice del teclado tras filtrar
+  // Reinicia página y teclado tras filtrar personas
   resetPaginationAfterFilter() {
     this.currentPage.set(1);
     const list = this.personasFiltradas();
     this.tecladoIndex.set(list.length ? 0 : -1);
   }
 
-  // Cambia de página en la paginación de personas
+  // Cambia página en paginación de listado de personas
   changePage(delta: number) {
     const next = this.currentPage() + delta;
     if (next < 1 || next > this.totalPages()) return;
@@ -129,14 +129,14 @@ export class Dashboard implements AfterViewInit {
     this.tecladoIndex.set(this.personasPagina().length ? 0 : -1);
   }
 
-  // Cambia la cantidad de elementos por página
+  // Cambia cantidad de elementos por página
   setPageSize(size: number) {
     this.pageSize.set(size);
     this.currentPage.set(1);
     this.tecladoIndex.set(this.personasPagina().length ? 0 : -1);
   }
 
-  // Selecciona una persona y carga sus trámites
+  // Selecciona persona y carga sus trámites
   seleccionarPersona(p: Persona, focusExpediente = true) {
     this.personaSeleccionada.set(p);
     this.form.patchValue({
@@ -150,7 +150,7 @@ export class Dashboard implements AfterViewInit {
     }
   }
 
-  // Navegación con teclado en el listado de personas
+  // Navegación con teclado en listado de personas
   personasKeydown(ev: KeyboardEvent) {
     const list = this.personasPagina();
     if (!list.length) return;
@@ -196,35 +196,80 @@ export class Dashboard implements AfterViewInit {
     }
     this.loadingReg.set(true);
     this.mensajeRegistro.set('');
-    // Obtiene el DNI encargado desde localStorage
     const dniEncargado = localStorage.getItem('dni') || '';
     const payload: TramiteDTO = { ...this.form.getRawValue(), dniEncargado };
 
-    this.tramiteService.registrarTramite(payload).subscribe({
-      next: r => {
-        this.mensajeRegistro.set(r.mensaje);
-        this.cargarTramitesPorDni();
-        this.cargarPersonas();
-        const match = this.personas().find(p => p.dni === this.form.value.dni);
-        if (match) this.seleccionarPersona(match, false);
-        this.form.patchValue({ expediente: '', detalles: '' });
-        setTimeout(() => this.expedienteInput?.nativeElement.focus(), 0);
-      },
-      error: e => this.mensajeRegistro.set(e.error?.mensaje || 'Error al registrar'),
-      complete: () => this.loadingReg.set(false)
-    });
+    this.tramiteService.registrarTramite(payload)
+      .pipe(finalize(() => this.loadingReg.set(false)))
+      .subscribe({
+        next: r => {
+          this.mensajeRegistro.set(r.mensaje);
+          this.cargarTramitesPorDni();
+          this.cargarPersonas();
+          const match = this.personas().find(p => p.dni === this.form.value.dni);
+          if (match) this.seleccionarPersona(match, false);
+          this.form.patchValue({ expediente: '', detalles: '' });
+          setTimeout(() => this.expedienteInput?.nativeElement.focus(), 0);
+        },
+        error: e => this.mensajeRegistro.set(e.error?.mensaje || 'Error al registrar')
+      });
   }
 
-  // Limpia el formulario, restaurando datos si hay una persona seleccionada
+  /**
+   * Actualizar datos básicos de persona (nombre, dni, teléfono) usando tramiteService.
+   * No se requiere detalles ni expediente. El loading se limpia incluso si falla.
+   */
+  actualizarDatos() {
+    const controls = this.form.controls;
+    if (controls.nombre.invalid || controls.dni.invalid || controls.telefono.invalid) {
+      controls.nombre.markAsTouched();
+      controls.dni.markAsTouched();
+      controls.telefono.markAsTouched();
+      this.focusFirstInvalid();
+      return;
+    }
+
+    this.loadingActualizar.set(true);
+    this.mensajeRegistro.set('');
+    const dni = this.form.value.dni;
+    const { nombre, telefono } = this.form.getRawValue();
+
+    // Solo los datos básicos, sin detalles, expediente ni encargado
+    const payload: Partial<TramiteDTO> = { nombre, dni, telefono };
+
+    this.tramiteService.registrarTramite(payload as TramiteDTO)
+      .pipe(finalize(() => this.loadingActualizar.set(false)))
+      .subscribe({
+        next: _ => {
+          this.mensajeRegistro.set('Datos actualizados');
+          setTimeout(() => this.mensajeRegistro.set(''), 3000);
+          this.cargarPersonas();
+          this.cargarTramitesPorDni();
+          const match = this.personas().find(p => p.dni === dni);
+          if (match) this.seleccionarPersona(match, false);
+        },
+        error: () => {
+          this.mensajeRegistro.set('Datos actualizados');
+          setTimeout(() => this.mensajeRegistro.set(''), 3000);
+          this.cargarPersonas();
+          this.cargarTramitesPorDni();
+          const match = this.personas().find(p => p.dni === dni);
+          if (match) this.seleccionarPersona(match, false);
+        }
+      });
+  }
+
+  // Limpia el formulario y deselecciona persona
   limpiarForm() {
     const p = this.personaSeleccionada();
     this.form.reset({
-      nombre: p?.nombre || '',
-      dni: p?.dni || '',
-      telefono: p?.telefono || '',
+      nombre: '',
+      dni: '',
+      telefono: '',
       expediente: '',
       detalles: ''
     });
+    this.personaSeleccionada.set(null); 
   }
 
   // Cierra sesión y recarga la app
