@@ -3,18 +3,24 @@ package com.sistema.recepcion.models;
 import jakarta.persistence.*;
 
 import java.util.Date;
-
+//los modelos son las tablas de la base de datos, como uso jpa se generan automaticamente en base a los modelos de abajo
+//en la parte superior esta el nombre de tabla y el morado o el que se encuentra al lado del tipo de variable el nombre que se usara en la logica
 @Entity
 public class DetallesTramite {
 
+    //id auto generado
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    //relacion con la tabla tramites, el modelo esta en la misma carpeta
     @ManyToOne
+    //nombre de tabla en la base de datos
     @JoinColumn(name = "id_tramite", nullable = false)
+    //nombre de la variable tramite
     private Tramite tramite;
 
+    //igual para los demas datos
     @Column(name = "fecha_proceso", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaProceso;

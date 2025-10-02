@@ -1,5 +1,6 @@
 package com.sistema.recepcion.DTO;
 
+//mismo proceso que el anteriora
 public class MensajeDTO {
         private String message;
 

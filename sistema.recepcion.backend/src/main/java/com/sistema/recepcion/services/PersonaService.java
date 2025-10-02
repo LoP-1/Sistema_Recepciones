@@ -14,7 +14,8 @@ public class PersonaService {
     private PersonaRepository personaRepository;
 
     //listar todas las personas
-    public List<Persona> listarPersonas(){
+    public List<Persona> listarPersonas() {
+        //el repositorio ya tenia el metodo :p
        List<Persona> personas = personaRepository.findAll();
         return personas;
     }

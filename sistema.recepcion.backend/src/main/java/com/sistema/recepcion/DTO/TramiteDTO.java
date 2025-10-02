@@ -1,5 +1,6 @@
 package com.sistema.recepcion.DTO;
 
+//igual que los otros dto, esta mas completo porque tiene mas datos :p
 public class TramiteDTO {
     private String nombre;
     private String dni;

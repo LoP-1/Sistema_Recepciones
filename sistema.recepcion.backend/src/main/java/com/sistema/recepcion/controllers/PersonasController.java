@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+//controlador de personas , igual que los anteriores
 @RestController
 @RequestMapping("/personas")
 public class PersonasController {

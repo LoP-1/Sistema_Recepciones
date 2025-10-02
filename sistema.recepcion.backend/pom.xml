@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.sistema.de.recepcion</groupId>
 	<artifactId>sistema.recepcion</artifactId>
-	<version>0.1</version>
+	<version>1.0</version>
 	<name>sistema.recepcion</name>
 	<description>sistema para controlar recepcion fut </description>
 	<url/>
@@ -74,6 +74,12 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 	</dependencies>
 
 	<build>

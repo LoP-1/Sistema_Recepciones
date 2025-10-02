@@ -14,13 +14,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+//los controladores llaman a los sevicios, esta parte es para definir las url mas que nada
+//controlador de las descargas
 @RestController
+//url padre
 @RequestMapping("/download")
 public class ArchivoController {
 
     @Value("${archivos.tramites.upload-dir}")
     private String uploadDir;
 
+    //url hija  /download/{nombreArchivo}
     @GetMapping("/{nombreArchivo}")
     public ResponseEntity<Resource> descargarArchivo(@PathVariable String nombreArchivo) {
         try {

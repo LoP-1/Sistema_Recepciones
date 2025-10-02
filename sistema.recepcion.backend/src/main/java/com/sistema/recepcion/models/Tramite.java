@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 
+//igual que en detalle tramite modelo de la tabla en la base de datos, revisar ahi comentarios
 @Entity
 @Table(name = "tramite")
 public class Tramite {

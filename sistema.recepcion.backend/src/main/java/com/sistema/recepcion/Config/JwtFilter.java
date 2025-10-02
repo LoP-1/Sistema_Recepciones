@@ -16,6 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Collections;
 
+//filtro jwt, se encarga de proteger los endpoints
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
@@ -34,7 +35,7 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         String path = request.getRequestURI();
-
+        //endpoints libres
         boolean publicEndpoint =
                 path.startsWith("/encargado/login") ||
                         path.startsWith("/encargado/registrar") ||
@@ -42,6 +43,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
+        //proceso de validacion
         if (!publicEndpoint && authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
             try {

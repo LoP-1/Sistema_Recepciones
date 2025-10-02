@@ -2,6 +2,7 @@ package com.sistema.recepcion.models;
 
 import jakarta.persistence.*;
 
+//igual que en detalle tramite modelo de la tabla en la base de datos, revisar ahi comentarios
 @Entity
 @Table(name = "encargado")
 public class Encargado {
