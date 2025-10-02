@@ -24,6 +24,21 @@
       }
     </div>
 
+    <!-- Mostrar campos extra para proceso personalizado -->
+    @if (form.value.tipoProceso === 'Personalizado') {
+      <div class="field">
+        <label for="fCustomTipoProceso">Nombre de proceso personalizado <span class="req" aria-hidden="true">*</span></label>
+        <input id="fCustomTipoProceso"
+               formControlName="customTipoProceso"
+               [class.invalid]="form.controls.customTipoProceso.touched && form.controls.customTipoProceso.invalid"
+               [attr.aria-invalid]="form.controls.customTipoProceso.touched && form.controls.customTipoProceso.invalid || null"
+               placeholder="Ej: Proceso especial" />
+        @if (form.controls.customTipoProceso.touched && form.controls.customTipoProceso.invalid) {
+          <div class="error">Requerido</div>
+        }
+      </div>
+    }
+
     <!-- Descripción del proceso -->
     <div class="field">
       <label for="fDetalles">Detalles / Descripción <span class="req" aria-hidden="true">*</span></label>
@@ -37,6 +52,24 @@
         <div class="error">Mínimo 5 caracteres</div>
       }
     </div>
+
+    <!-- Campos extra para tipo proceso "Adjunto" o "Personalizado" -->
+    @if (form.value.tipoProceso === 'Adjunto' || form.value.tipoProceso === 'Personalizado') {
+      <div class="field">
+        <label for="fBoleta">Boleta (opcional)</label>
+        <input id="fBoleta"
+               formControlName="boleta"
+               placeholder="Número de boleta" />
+      </div>
+      <div class="field">
+        <label for="fMonto">Monto (opcional)</label>
+        <input id="fMonto"
+               type="number"
+               min="0"
+               formControlName="monto"
+               placeholder="Ej: 100.00" />
+      </div>
+    }
 
     <!-- Subida de archivos adjuntos -->
     <div class="upload-block">
@@ -138,37 +171,47 @@
     }
 
     <!-- Listado del historial -->
-    @if (!cargandoHistorial() && historial().length) {
-      <ul class="timeline-list">
-        @for (item of historial(); track item.id) {
-          <li class="timeline-item">
-            <div class="timeline-row">
-              <div class="timeline-date">
-                <span aria-hidden="true">🕒</span>
-                {{ item.fechaProceso | date:'yyyy-MM-dd HH:mm' }}
-              </div>
-              <span class="badge"
-                    [ngClass]="{
-                      'badge-finalizado': item.tipoProceso === 'Finalizado',
-                      'badge-iniciado': item.tipoProceso === 'Iniciado',
-                      'badge-adjunto': item.tipoProceso === 'Adjunto',
-                      'badge-azul': item.tipoProceso !== 'Finalizado' && item.tipoProceso !== 'Iniciado' && item.tipoProceso !== 'Adjunto'
-                    }">
-                {{ item.tipoProceso }}
-              </span>
-            </div>
-            <p class="timeline-detalles">{{ item.detalles }}</p>
-            @if (item.nombreArchivo) {
-              <div class="timeline-file">
-                <span aria-hidden="true">📎</span>
-                <span class="file-link">{{ item.nombreArchivo }}</span>
-                <button type="button" class="btn ghost small" (click)="descargarAdjunto(item)">Descargar</button>
-              </div>
-            }
-          </li>
-        }
-      </ul>
+@for (item of historial(); track item.id) {
+  <li class="timeline-item">
+    <div class="timeline-row">
+      <div class="timeline-date">
+        <span aria-hidden="true">🕒</span>
+        {{ item.fechaProceso | date:'yyyy-MM-dd HH:mm' }}
+      </div>
+      <span class="badge"
+            [ngClass]="{
+              'badge-finalizado': item.tipoProceso === 'Finalizado',
+              'badge-iniciado': item.tipoProceso === 'Iniciado',
+              'badge-adjunto': item.tipoProceso === 'Adjunto',
+              'badge-azul': item.tipoProceso !== 'Finalizado' && item.tipoProceso !== 'Iniciado' && item.tipoProceso !== 'Adjunto'
+            }">
+        {{ item.tipoProceso }}
+      </span>
+    </div>
+    <p class="timeline-detalles">{{ item.detalles }}</p>
+    
+    <!-- Mostrar Boleta si existe -->
+    @if (item.boleta) {
+      <p class="timeline-detalles">
+        <strong>Boleta:</strong> {{ item.boleta }}
+      </p>
     }
+    <!-- Mostrar Monto si existe y es número -->
+    @if (item.monto != null && item.monto !== undefined) {
+      <p class="timeline-detalles">
+        <strong>Monto:</strong> {{ "S/." +item.monto }}
+      </p>
+    }
+
+    @if (item.nombreArchivo) {
+      <div class="timeline-file">
+        <span aria-hidden="true">📎</span>
+        <span class="file-link">{{ item.nombreArchivo }}</span>
+        <button type="button" class="btn ghost small" (click)="descargarAdjunto(item)">Descargar</button>
+      </div>
+    }
+  </li>
+}
 
     <!-- No hay historial -->
     @if (!cargandoHistorial() && !historial().length) {

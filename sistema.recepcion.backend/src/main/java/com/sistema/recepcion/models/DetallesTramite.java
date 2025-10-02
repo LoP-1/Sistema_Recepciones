@@ -37,7 +37,30 @@ public class DetallesTramite {
     @Column(name = "url_archivo")
     private String urlArchivo;
 
+    @Column(name = "boleta")
+    private String boleta;
+
+    @Column(name = "monto")
+    private Double monto;
+
     //getters y setters
+
+
+    public Double getMonto() {
+        return monto;
+    }
+
+    public void setMonto(Double monto) {
+        this.monto = monto;
+    }
+
+    public String getBoleta() {
+        return boleta;
+    }
+
+    public void setBoleta(String boleta) {
+        this.boleta = boleta;
+    }
 
     public Long getId() {
         return id;

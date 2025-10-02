@@ -8,4 +8,6 @@ export interface HistorialProceso {
   detalles: string;
     nombreArchivo?: string;
   urlArchivo?: string;
+  boleta?: string;
+  monto?: number;
 }

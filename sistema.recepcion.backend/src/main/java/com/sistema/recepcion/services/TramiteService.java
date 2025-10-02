@@ -174,6 +174,11 @@ public class TramiteService {
 
             detallesTramite.setTramite(tramite);
             detallesTramite.setFechaProceso(new Date());
+
+            // campos nuevos para boleta y monto, ok!
+            detallesTramite.setMonto(detallesTramite.getMonto());
+            detallesTramite.setBoleta(detallesTramite.getBoleta());
+
             detallesTramiteRepository.save(detallesTramite);
             return "Detalles agregados con éxito";
         } else {

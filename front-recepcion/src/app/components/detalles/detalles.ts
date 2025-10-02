@@ -1,5 +1,6 @@
 // Componente para agregar detalles, evidencias y gestionar el historial de un trámite.
 // Incluye subida de archivos, vista previa (imagen/PDF), descarga y finalización del trámite.
+// Ahora permite campos opcionales boleta y monto en adjunto y personalizado, y proceso personalizado.
 
 import {
   Component,
@@ -55,13 +56,17 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
   private modalRef = inject(ModalRef<AgregarDetallesTramite>);
   private sanitizer = inject(DomSanitizer);
 
-  // Tipos de proceso que puede agregar el usuario
-  tiposProceso = ['Seguimiento','Llamada','Verificación','Adjunto','Observación'];
+  // Tipos de proceso que puede agregar el usuario, ahora con opción personalizada
+  tiposProceso = ['Seguimiento','Llamada','Verificación','Adjunto','Observación','Personalizado'];
 
   // Formulario reactivo para detalles del proceso
   form = this.fb.nonNullable.group({
     tipoProceso: ['Seguimiento', Validators.required],
-    detalles: ['', [Validators.required, Validators.minLength(5)]]
+    detalles: ['', [Validators.required, Validators.minLength(5)]],
+    // nuevos campos opcionales para adjunto/personalizado
+    boleta: [''],
+    monto: [''],
+    customTipoProceso: ['']
   });
 
   // Estado y datos del archivo adjunto
@@ -228,12 +233,21 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
     this.esError.set(false);
 
     const arch = this.archivo();
+
+    // Lógica para tipo proceso personalizado
+    let tipoProcesoFinal = this.form.value.tipoProceso ?? '';
+if (tipoProcesoFinal === 'Personalizado') {
+  tipoProcesoFinal = this.form.value.customTipoProceso?.trim() || 'Personalizado';
+}
+
     const payload: DetallesTramite = {
       tramite: { idTramite: this.idTramite },
-      tipoProceso: this.form.value.tipoProceso!,
+      tipoProceso: tipoProcesoFinal,
       detalles: this.form.value.detalles!,
       nombreArchivo: arch?.nombre || '',
-      urlArchivo: arch?.base64 || ''   // Base64 (PDF o imagen). Si vacío -> no se guarda archivo.
+      urlArchivo: arch?.base64 || '', // Base64 (PDF o imagen). Si vacío -> no se guarda archivo.
+      boleta: this.form.value.boleta || undefined,
+      monto: this.form.value.monto !== '' && this.form.value.monto !== null ? Number(this.form.value.monto) : undefined
     };
 
     this.tramiteService.agregarDetalles(payload).subscribe({
@@ -282,7 +296,10 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
   limpiarTodo() {
     this.form.reset({
       tipoProceso: 'Seguimiento',
-      detalles: ''
+      detalles: '',
+      boleta: '',
+      monto: '',
+      customTipoProceso: ''
     });
     this.quitarArchivo();
     this.mensaje.set('');

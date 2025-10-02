@@ -189,31 +189,41 @@ export class Dashboard implements AfterViewInit {
   }
 
   // Envía el formulario para registrar un nuevo trámite
-  registrar() {
-    if (this.form.invalid) {
-      this.focusFirstInvalid();
-      return;
-    }
-    this.loadingReg.set(true);
-    this.mensajeRegistro.set('');
-    const dniEncargado = localStorage.getItem('dni') || '';
-    const payload: TramiteDTO = { ...this.form.getRawValue(), dniEncargado };
-
-    this.tramiteService.registrarTramite(payload)
-      .pipe(finalize(() => this.loadingReg.set(false)))
-      .subscribe({
-        next: r => {
-          this.mensajeRegistro.set(r.mensaje);
-          this.cargarTramitesPorDni();
-          this.cargarPersonas();
-          const match = this.personas().find(p => p.dni === this.form.value.dni);
-          if (match) this.seleccionarPersona(match, false);
-          this.form.patchValue({ expediente: '', detalles: '' });
-          setTimeout(() => this.expedienteInput?.nativeElement.focus(), 0);
-        },
-        error: e => this.mensajeRegistro.set(e.error?.mensaje || 'Error al registrar')
-      });
+registrar() {
+  if (this.form.invalid) {
+    this.focusFirstInvalid();
+    return;
   }
+  this.loadingReg.set(true);
+  this.mensajeRegistro.set('');
+  const dniEncargado = localStorage.getItem('dni') || '';
+  const payload: TramiteDTO = { ...this.form.getRawValue(), dniEncargado };
+
+  this.tramiteService.registrarTramite(payload)
+    .pipe(finalize(() => this.loadingReg.set(false)))
+    .subscribe({
+  next: r => {
+    // Si la respuesta es vacía o no tiene mensaje, igual muestra éxito
+    this.mensajeRegistro.set(r && r.mensaje ? r.mensaje : 'Trámite registrado con éxito 👍');
+    this.cargarTramitesPorDni();
+    this.cargarPersonas();
+    const match = this.personas().find(p => p.dni === this.form.value.dni);
+    if (match) this.seleccionarPersona(match, false);
+    this.form.patchValue({ expediente: '', detalles: '' });
+    setTimeout(() => this.expedienteInput?.nativeElement.focus(), 0);
+    setTimeout(() => this.mensajeRegistro.set(''), 3000);
+  },
+  error: e => {
+    // Si el error es realmente por status 201, trata como éxito
+    if (e.status >= 200 && e.status < 300) {
+      this.mensajeRegistro.set('Trámite registrado con éxito 👍');
+      setTimeout(() => this.mensajeRegistro.set(''), 3000);
+    } else {
+      this.mensajeRegistro.set(e.error?.mensaje || 'Error al registrar');
+    }
+  }
+});
+}
 
   /**
    * Actualizar datos básicos de persona (nombre, dni, teléfono) usando tramiteService.
