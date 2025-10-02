@@ -19,7 +19,7 @@ public class EncargadoService {
 
     //recibe un json con forma de Encargado (el modelo encargado)
     public String guardarEncargado(Encargado encargado){
-        //lo guarda, si el repositorio trae el crud por defecto
+        //lo guarda,el repositorio trae el crud por defecto
         encargadoRepository.save(encargado);
         return "Encargado registrado con exito";
     }
