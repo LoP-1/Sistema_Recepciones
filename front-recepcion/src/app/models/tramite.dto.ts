@@ -5,4 +5,5 @@ export interface TramiteDTO {
   expediente: string;
   detalles: string;
   dniEncargado: string;
+  fechasPedidas?: string;
 }

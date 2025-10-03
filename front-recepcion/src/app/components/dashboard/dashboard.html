@@ -61,6 +61,21 @@
             <div class="error">Requerido</div>
           }
         </div>
+         <div class="field">
+  <label for="fFechaInicio">Fecha inicio</label>
+  <input id="fFechaInicio"
+         type="text"
+         formControlName="fechaInicio"
+         placeholder="Ej: 1989 - Enero" />
+  <!-- No mostrar error de requerido aquí -->
+</div>
+<div class="field">
+  <label for="fFechaFin">Fecha fin</label>
+  <input id="fFechaFin"
+         type="text"
+         formControlName="fechaFin"
+         placeholder="Ej: 2010 - Julio" />
+</div>
         <!-- Campo: Detalles -->
         <div class="field field-span-2">
           <label for="fDetalles">Descripción / Detalles <span class="req" aria-hidden="true">*</span></label>
@@ -73,6 +88,7 @@
             <div class="error">Requerido</div>
           }
         </div>
+       
       </div>
 
       <div class="actions">
@@ -180,6 +196,32 @@
 
   <!-- Tabla de trámites por persona seleccionada -->
   <section class="card tramite-zone" aria-labelledby="tituloTramites">
+    <div class="tramite-filtros">
+  <div class="field">
+    <label for="fFiltroExp">Buscar por expediente</label>
+    <input id="fFiltroExp"
+           type="text"
+           placeholder="N° expediente"
+           [value]="filtroExpediente()"
+           (input)="filtroExpediente.set($event.target.value)" />
+  </div>
+  <div class="field">
+    <label for="fFiltroIni">Año inicio</label>
+    <input id="fFiltroIni"
+           type="text"
+           placeholder="Ej: 2000"
+           [value]="filtroFechaInicio()"
+           (input)="filtroFechaInicio.set($event.target.value)" />
+  </div>
+  <div class="field">
+    <label for="fFiltroFin">Año fin</label>
+    <input id="fFiltroFin"
+           type="text"
+           placeholder="Ej: 2024"
+           [value]="filtroFechaFin()"
+           (input)="filtroFechaFin.set($event.target.value)" />
+  </div>
+</div>
     <div class="card-header">
       <h2 id="tituloTramites" class="card-title">
         Trámites de {{ personaSeleccionada()?.nombre || '...' }}
@@ -226,7 +268,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (t of tramitesFiltrados(); track t.idTramite) {
+              @for (t of tramitesFiltradosTabla(); track t.idTramite) {
                 <tr (click)="abrirDetalles(t.idTramite)"
                     class="row-link"
                     tabindex="0"

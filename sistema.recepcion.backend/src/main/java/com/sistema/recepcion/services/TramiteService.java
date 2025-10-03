@@ -82,6 +82,7 @@ public class TramiteService {
         tramite.setNroExpediente(datosTramite.getExpediente());
         tramite.setEncargado(encargado);
         tramite.setEstado(false);
+        tramite.setFechas(datosTramite.getFechasPedidas());
         tramiteRepository.save(tramite);
 
         //agregar detalle de inicio

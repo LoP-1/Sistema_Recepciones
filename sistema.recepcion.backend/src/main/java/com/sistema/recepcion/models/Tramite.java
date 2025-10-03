@@ -28,6 +28,9 @@ public class Tramite {
     @Column(name = "nro_expediente", length = 40, nullable = false)
     private String nroExpediente;
 
+    @Column(name = "fechas_pedido")
+    private String fechas;
+
     @Column(name = "fecha_inicio")
     @Temporal(TemporalType.DATE)
     private Date fechaInicio;
@@ -47,6 +50,14 @@ public class Tramite {
 
     // Getters y Setters
 
+
+    public String getFechas() {
+        return fechas;
+    }
+
+    public void setFechas(String fechas) {
+        this.fechas = fechas;
+    }
 
     public Boolean getEstado() {
         return estado;

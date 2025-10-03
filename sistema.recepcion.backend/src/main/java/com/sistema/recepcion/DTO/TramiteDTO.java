@@ -8,9 +8,18 @@ public class TramiteDTO {
     private String expediente;
     private String detalles;
     private String dniEncargado;
+    private String fechasPedidas;
 
     //getters y setters
 
+
+    public String getFechasPedidas() {
+        return fechasPedidas;
+    }
+
+    public void setFechasPedidas(String fechasPedidas) {
+        this.fechasPedidas = fechasPedidas;
+    }
 
     public String getDniEncargado() {
         return dniEncargado;

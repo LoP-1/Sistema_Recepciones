@@ -1,7 +1,3 @@
-// Componente para agregar detalles, evidencias y gestionar el historial de un trámite.
-// Incluye subida de archivos, vista previa (imagen/PDF), descarga y finalización del trámite.
-// Ahora permite campos opcionales boleta y monto en adjunto y personalizado, y proceso personalizado.
-
 import {
   Component,
   inject,
@@ -56,20 +52,16 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
   private modalRef = inject(ModalRef<AgregarDetallesTramite>);
   private sanitizer = inject(DomSanitizer);
 
-  // Tipos de proceso que puede agregar el usuario, ahora con opción personalizada
   tiposProceso = ['Seguimiento','Llamada','Verificación','Adjunto','Observación','Personalizado'];
 
-  // Formulario reactivo para detalles del proceso
   form = this.fb.nonNullable.group({
     tipoProceso: ['Seguimiento', Validators.required],
     detalles: ['', [Validators.required, Validators.minLength(5)]],
-    // nuevos campos opcionales para adjunto/personalizado
     boleta: [''],
     monto: [''],
     customTipoProceso: ['']
   });
 
-  // Estado y datos del archivo adjunto
   archivo = signal<ArchivoPreview | null>(null);
 
   cargando = signal(false);
@@ -77,7 +69,6 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
   esError  = signal(false);
   maxSizeBytes = 5 * 1024 * 1024;
 
-  // Historial de procesos para el trámite
   historial = signal<HistorialProceso[]>([]);
   cargandoHistorial = signal(false);
   cargandoFinalizar  = signal(false);
@@ -88,19 +79,16 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
 
   private idTramite = 0;
 
-  // Obtiene el id del trámite desde el modal
   constructor(@Inject(MODAL_DATA) public data: { idTramite?: number } | null) {
     if (data?.idTramite) {
       this.idTramite = data.idTramite;
     }
   }
 
-  // Al montar el componente, carga el historial
   ngOnInit() {
     this.cargarHistorial();
   }
 
-  // Al destruir el componente, libera URL de archivos temporales
   ngOnDestroy() {
     this.revokeObjectUrl();
   }
@@ -109,7 +97,6 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
     this.modalRef.close();
   }
 
-  // --- HISTORIAL ---
   cargarHistorial() {
     const id = this.idTramite;
     if (id > 0) {
@@ -124,7 +111,6 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
     }
   }
 
-  // --- ARCHIVOS ---
   onFileInputChange(ev: Event) {
     const input = ev.target as HTMLInputElement;
     if (input.files?.length) {
@@ -137,7 +123,6 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
     if (list.length) this.procesarArchivo(list[0]);
   }
 
-  // Procesa archivo adjunto y genera vista previa
   private procesarArchivo(file: File) {
     if (file.size > this.maxSizeBytes) {
       this.mensaje.set(`El archivo supera ${(this.maxSizeBytes/1024/1024).toFixed(1)}MB`);
@@ -159,29 +144,22 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
       esImagen
     };
 
-    // Imágenes y PDFs en base64 (porque backend lo necesita)
     const reader = new FileReader();
-
-    if (esImagen || file.type === 'application/pdf') {
-      reader.onload = () => {
-        preview.base64 = reader.result as string; // data:<mime>;base64,...
-        // Si PDF: crear además objectUrl + safeUrl para iframe
-        if (file.type === 'application/pdf') {
-          preview.objectUrl = URL.createObjectURL(file);
-          preview.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(preview.objectUrl);
-        }
-        this.archivo.set(preview);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      // Otros tipos: solo object URL para abrir/descargar
-      preview.objectUrl = URL.createObjectURL(file);
-      preview.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(preview.objectUrl);
+    reader.onload = () => {
+      preview.base64 = reader.result as string;
+      if (file.type === 'application/pdf') {
+        preview.objectUrl = URL.createObjectURL(file);
+        preview.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(preview.objectUrl);
+      }
+      if (!esImagen && file.type !== 'application/pdf') {
+        preview.objectUrl = URL.createObjectURL(file);
+        preview.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(preview.objectUrl);
+      }
       this.archivo.set(preview);
-    }
+    };
+    reader.readAsDataURL(file);
   }
 
-  // Marca que el PDF no se pudo mostrar embebido
   marcarIframeError() {
     const a = this.archivo();
     if (!a) return;
@@ -189,20 +167,17 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
     this.archivo.set({ ...a });
   }
 
-  // Elimina el archivo adjunto y limpia la vista ampliada
   quitarArchivo() {
     this.revokeObjectUrl();
     this.archivo.set(null);
     this.superPreviewVisible.set(false);
   }
 
-  // Libera URLs temporales para archivos
   private revokeObjectUrl() {
     const a = this.archivo();
     if (a?.objectUrl) URL.revokeObjectURL(a.objectUrl);
   }
 
-  // Muestra el archivo en modo ampliado
   abrirSuper() {
     if (this.archivo()) this.superPreviewVisible.set(true);
   }
@@ -210,7 +185,6 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
     this.superPreviewVisible.set(false);
   }
 
-  // Abre el archivo en una nueva pestaña
   abrirEnNuevaPestana() {
     const a = this.archivo();
     if (!a) return;
@@ -221,8 +195,6 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
     }
   }
 
-  // --- GUARDAR / FINALIZAR ---
-  // Guarda los detalles del proceso actual
   guardar() {
     if (this.form.invalid) {
       this.focusFirstInvalid();
@@ -234,18 +206,17 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
 
     const arch = this.archivo();
 
-    // Lógica para tipo proceso personalizado
     let tipoProcesoFinal = this.form.value.tipoProceso ?? '';
-if (tipoProcesoFinal === 'Personalizado') {
-  tipoProcesoFinal = this.form.value.customTipoProceso?.trim() || 'Personalizado';
-}
+    if (tipoProcesoFinal === 'Personalizado') {
+      tipoProcesoFinal = this.form.value.customTipoProceso?.trim() || 'Personalizado';
+    }
 
     const payload: DetallesTramite = {
       tramite: { idTramite: this.idTramite },
       tipoProceso: tipoProcesoFinal,
       detalles: this.form.value.detalles!,
       nombreArchivo: arch?.nombre || '',
-      urlArchivo: arch?.base64 || '', // Base64 (PDF o imagen). Si vacío -> no se guarda archivo.
+      urlArchivo: arch?.base64 || '',
       boleta: this.form.value.boleta || undefined,
       monto: this.form.value.monto !== '' && this.form.value.monto !== null ? Number(this.form.value.monto) : undefined
     };
@@ -266,7 +237,6 @@ if (tipoProcesoFinal === 'Personalizado') {
     });
   }
 
-  // Marca el trámite como finalizado
   finalizarTramiteClick() {
     const id = this.idTramite;
     if (!id || id <= 0) {
@@ -292,7 +262,6 @@ if (tipoProcesoFinal === 'Personalizado') {
     });
   }
 
-  // Limpia el formulario y recarga el historial
   limpiarTodo() {
     this.form.reset({
       tipoProceso: 'Seguimiento',
@@ -307,14 +276,12 @@ if (tipoProcesoFinal === 'Personalizado') {
     this.cargarHistorial();
   }
 
-  // Descarga archivo adjunto del historial
   descargarAdjunto(item: HistorialProceso) {
     if (!item.nombreArchivo) return;
     const url = `${environment.apiUrl}/download/` + encodeURIComponent(item.nombreArchivo);
     window.open(url, '_blank');
   }
 
-  // Enfoca el primer campo inválido del formulario
   private focusFirstInvalid() {
     const invalid = Object.keys(this.form.controls)
       .find(k => (this.form.controls as any)[k].invalid);
@@ -326,4 +293,250 @@ if (tipoProcesoFinal === 'Personalizado') {
   logExitoPDF() {
     console.log('PDF cargado en iframe correctamente');
   }
+
+  ImprimirTramite() {
+  const items = this.historial();
+  if (!items.length) return;
+
+  const ultimo = items[items.length - 1];
+  const tramite = ultimo.tramite;
+  const encargado = tramite.encargado;
+
+  const escapeHtml = (v: any) =>
+    String(v ?? '')
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;')
+      .replace(/'/g,'&#39;');
+
+  const formatFecha = (f: any) => {
+    if (!f) return '';
+    try {
+      const d = new Date(f);
+      if (isNaN(d.getTime())) return escapeHtml(f);
+      return d.toLocaleDateString('es-PE', {
+        year: 'numeric', month: '2-digit', day: '2-digit'
+      });
+    } catch {
+      return escapeHtml(f);
+    }
+  };
+
+  const logoUrl = 'logo-drej.png'; // Ruta real proporcionada
+
+  const fechaEmision = new Date();
+  const fechaEmisionStr = fechaEmision.toLocaleDateString('es-PE', {
+    year:'numeric', month:'2-digit', day:'2-digit'
+  });
+  const horaEmisionStr = fechaEmision.toLocaleTimeString('es-PE', {
+    hour:'2-digit', minute:'2-digit'
+  });
+
+  const estadoTexto = tramite.estado ? 'Completado' : 'En proceso';
+
+  const html = `
+  <!DOCTYPE html>
+  <html lang="es">
+    <head>
+      <meta charset="utf-8">
+      <title>Constancia - ${escapeHtml(tramite.nroExpediente || '')}</title>
+      <style>
+        @page {
+          size: A5 portrait;
+          margin: 14mm 16mm;
+        }
+        body {
+          font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+          font-size: 12px;
+          color: #000;
+          margin: 0;
+          -webkit-print-color-adjust: exact;
+        }
+        .logo-wrapper {
+          text-align: center;
+          margin-bottom: 6px;
+        }
+        .logo-wrapper img {
+          max-height: 70px;
+          max-width: 140px;
+        }
+        .title {
+          text-align: center;
+          font-size: 14px;
+          font-weight: 700;
+          letter-spacing: .5px;
+          text-transform: uppercase;
+          margin: 2px 0 4px;
+        }
+        .expediente {
+          text-align: center;
+          font-size: 11px;
+          margin-bottom: 10px;
+        }
+        .emitido {
+          text-align: right;
+          font-size: 10px;
+          margin-top: -4px;
+          margin-bottom: 10px;
+        }
+        .section {
+          margin-top: 10px;
+        }
+        .section-title {
+          font-size: 11px;
+          font-weight: 700;
+          text-transform: uppercase;
+          margin: 12px 0 4px;
+          letter-spacing: .5px;
+        }
+        table.clean {
+          width: 100%;
+          border-collapse: collapse;
+        }
+        table.clean td {
+          padding: 2px 0 2px;
+          vertical-align: top;
+        }
+        table.clean td.label {
+          width: 42%;
+          font-weight: 600;
+          padding-right: 8px;
+          white-space: nowrap;
+        }
+        .descripcion {
+          margin-top: 6px;
+          font-size: 11.5px;
+          line-height: 1.35;
+          white-space: pre-wrap;
+        }
+        .estado-box {
+          font-weight: 600;
+        }
+        .firmas {
+          display: flex;
+          margin-top: 26px;
+          gap: 28px;
+        }
+        .firma {
+          flex: 1;
+          text-align: center;
+          font-size: 11px;
+        }
+        .firma-linea {
+          margin-top: 42px;
+          border-top: 1px solid #000;
+          padding-top: 4px;
+        }
+        .footer {
+          margin-top: 20px;
+          font-size: 9px;
+          text-align: center;
+        }
+        /* Opcional: separador sutil */
+        hr.linea {
+          border: none;
+          border-top: 1px solid #000;
+          margin: 10px 0 12px;
+          height: 0;
+        }
+
+        /* Para asegurar buena impresión monocromática */
+        @media print {
+          .no-print { display: none !important; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="logo-wrapper">
+        <img src="${logoUrl}" alt="Logo" onerror="this.style.display='none'">
+      </div>
+      <div class="title">CONSTANCIA DE TRÁMITE</div>
+      <div class="expediente">Expediente: <strong>${escapeHtml(tramite.nroExpediente || '')}</strong></div>
+      <div class="emitido">Emitido: ${fechaEmisionStr} ${horaEmisionStr}</div>
+      <hr class="linea">
+
+      <div class="section">
+        <div class="section-title">Beneficiario</div>
+        <table class="clean">
+          <tr>
+            <td class="label">Nombre</td>
+            <td>${escapeHtml(tramite.persona?.nombre || '')}</td>
+          </tr>
+          <tr>
+            <td class="label">DNI</td>
+            <td>${escapeHtml(tramite.persona?.dni || '')}</td>
+          </tr>
+            <tr>
+            <td class="label">Teléfono</td>
+            <td>${escapeHtml(tramite.persona?.telefono || '')}</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Información del Trámite</div>
+        <table class="clean">
+          <tr>
+            <td class="label">Encargado</td>
+            <td>${encargado ? escapeHtml(encargado.nombre + ' ' + encargado.apellido) : ''}</td>
+          </tr>
+          <tr>
+            <td class="label">DNI Encargado</td>
+            <td>${encargado ? escapeHtml(encargado.dni) : ''}</td>
+          </tr>
+          <tr>
+            <td class="label">Períodos solicitados</td>
+            <td>${escapeHtml(tramite.fechas || '')}</td>
+          </tr>
+          <tr>
+            <td class="label">Fecha inicio</td>
+            <td>${formatFecha(tramite.fechaInicio)}</td>
+          </tr>
+          <tr>
+            <td class="label">Fecha fin</td>
+            <td>${tramite.fechaFin ? formatFecha(tramite.fechaFin) : 'En proceso'}</td>
+          </tr>
+          <tr>
+            <td class="label">Estado</td>
+            <td class="estado-box">${escapeHtml(estadoTexto)}</td>
+          </tr>
+        </table>
+
+        <div class="section-title" style="margin-top:14px;">Descripción</div>
+        <div class="descripcion">
+          ${escapeHtml(tramite.descripcion || '')}
+        </div>
+      </div>
+
+      <div class="firmas">
+        <div class="firma">
+          <div class="firma-linea">Firma del Encargado</div>
+        </div>
+        <div class="firma">
+          <div class="firma-linea">Firma del Beneficiario</div>
+        </div>
+      </div>
+
+      <div class="footer">
+        Documento generado automáticamente. Sujeto a verificación administrativa.<br>
+      </div>
+
+      <script>
+        window.onload = function() {
+          setTimeout(function() {
+            window.print();
+          }, 120);
+        };
+      </script>
+    </body>
+  </html>
+  `;
+
+  const ventana = window.open('', '_blank', 'width=840,height=1000');
+  if (!ventana) return;
+  ventana.document.open();
+  ventana.document.write(html);
+  ventana.document.close();
+}
 }

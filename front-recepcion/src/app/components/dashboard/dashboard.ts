@@ -34,13 +34,17 @@ export class Dashboard implements AfterViewInit {
     telefono: ['', Validators.required],
     expediente: ['', Validators.required],
     detalles: ['', Validators.required],
+    fechaInicio: [''],   
+    fechaFin: [''], 
   });
-
   // Señales para feedback y estados de carga
   mensajeRegistro = signal('');
   loadingReg = signal(false);
   loadingActualizar = signal(false);
-
+  // Filtros de trámites
+filtroExpediente = signal('');
+  filtroFechaInicio = signal('');
+  filtroFechaFin = signal('');
   // Listado y filtrado de personas
   personas = signal<Persona[]>([]);
   filtroPersonas = signal('');
@@ -190,40 +194,40 @@ export class Dashboard implements AfterViewInit {
 
   // Envía el formulario para registrar un nuevo trámite
 registrar() {
-  if (this.form.invalid) {
-    this.focusFirstInvalid();
-    return;
-  }
-  this.loadingReg.set(true);
-  this.mensajeRegistro.set('');
-  const dniEncargado = localStorage.getItem('dni') || '';
-  const payload: TramiteDTO = { ...this.form.getRawValue(), dniEncargado };
-
-  this.tramiteService.registrarTramite(payload)
-    .pipe(finalize(() => this.loadingReg.set(false)))
-    .subscribe({
-  next: r => {
-    // Si la respuesta es vacía o no tiene mensaje, igual muestra éxito
-    this.mensajeRegistro.set(r && r.mensaje ? r.mensaje : 'Trámite registrado con éxito 👍');
-    this.cargarTramitesPorDni();
-    this.cargarPersonas();
-    const match = this.personas().find(p => p.dni === this.form.value.dni);
-    if (match) this.seleccionarPersona(match, false);
-    this.form.patchValue({ expediente: '', detalles: '' });
-    setTimeout(() => this.expedienteInput?.nativeElement.focus(), 0);
-    setTimeout(() => this.mensajeRegistro.set(''), 3000);
-  },
-  error: e => {
-    // Si el error es realmente por status 201, trata como éxito
-    if (e.status >= 200 && e.status < 300) {
-      this.mensajeRegistro.set('Trámite registrado con éxito 👍');
-      setTimeout(() => this.mensajeRegistro.set(''), 3000);
-    } else {
-      this.mensajeRegistro.set(e.error?.mensaje || 'Error al registrar');
+    if (this.form.invalid) {
+      this.focusFirstInvalid();
+      return;
     }
+    this.loadingReg.set(true);
+    this.mensajeRegistro.set('');
+    const dniEncargado = localStorage.getItem('dni') || '';
+    // Nuevo: compone el rango de fechas en texto
+    const fechasPedidas = `${this.form.value.fechaInicio}-${this.form.value.fechaFin}`;
+    const payload: TramiteDTO = { ...this.form.getRawValue(), dniEncargado, fechasPedidas };
+
+    this.tramiteService.registrarTramite(payload)
+      .pipe(finalize(() => this.loadingReg.set(false)))
+      .subscribe({
+        next: r => {
+          this.mensajeRegistro.set(r && r.mensaje ? r.mensaje : 'Trámite registrado con éxito 👍');
+          this.cargarTramitesPorDni();
+          this.cargarPersonas();
+          const match = this.personas().find(p => p.dni === this.form.value.dni);
+          if (match) this.seleccionarPersona(match, false);
+          this.form.patchValue({ expediente: '', detalles: '', fechaInicio: '', fechaFin: '' });
+          setTimeout(() => this.expedienteInput?.nativeElement.focus(), 0);
+          setTimeout(() => this.mensajeRegistro.set(''), 3000);
+        },
+        error: e => {
+          if (e.status >= 200 && e.status < 300) {
+            this.mensajeRegistro.set('Trámite registrado con éxito 👍');
+            setTimeout(() => this.mensajeRegistro.set(''), 3000);
+          } else {
+            this.mensajeRegistro.set(e.error?.mensaje || 'Error al registrar');
+          }
+        }
+      });
   }
-});
-}
 
   /**
    * Actualizar datos básicos de persona (nombre, dni, teléfono) usando tramiteService.
@@ -314,4 +318,33 @@ registrar() {
       panelClass: 'modal-sheet'
     });
   }
+
+tramitesFiltradosTabla = computed(() => {
+    let list = this.mostrarCompletados() ? this.tramites() : this.tramites().filter(t => !t.estado);
+
+    // Filtrado por número de expediente si hay texto
+    const exp = this.filtroExpediente().trim();
+    if (exp) {
+      list = list.filter(t => t.nroExpediente?.toString().includes(exp));
+    }
+
+    // Filtrado por rango de fechas si ambos están presentes
+    const ini = this.filtroFechaInicio().trim();
+    const fin = this.filtroFechaFin().trim();
+    list = list.filter(t => {
+  const tIni = t.fechaInicio ? new Date(t.fechaInicio).getFullYear().toString() : '';
+  const tFin = t.fechaFin ? new Date(t.fechaFin).getFullYear().toString() : '';
+  let match = true;
+  if (ini) {
+    match = match && tIni >= ini;
+  }
+  if (fin) {
+    match = match && (tFin ? tFin <= fin : true);
+  }
+  return match;
+});
+    return list;
+  });
+
+
 }

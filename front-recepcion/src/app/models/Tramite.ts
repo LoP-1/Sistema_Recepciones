@@ -17,4 +17,5 @@ export interface Tramite {
   fechaFin: string | null;
   descripcion: string;
   estado: boolean; 
+  fechas?: string;
 }

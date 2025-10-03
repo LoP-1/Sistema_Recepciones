@@ -107,6 +107,9 @@
   flex-direction: column;
   gap: 32px;
 }
+.field {
+  padding-bottom: 10px;
+}
 .field-grid {
   display: grid;
   gap: 24px 32px;
