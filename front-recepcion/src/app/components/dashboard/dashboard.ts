@@ -286,6 +286,12 @@ registrar() {
     this.personaSeleccionada.set(null); 
   }
 
+
+  getIniciales(persona: Persona): string {
+  const nombre = persona.nombre?.charAt(0) || '';
+  const apellido = (persona as any).apellido?.charAt(0) || '';
+  return nombre + apellido;
+  }
   // Cierra sesión y recarga la app
   logout() {
     localStorage.clear();

@@ -1,39 +1,111 @@
 <!-- Pantalla de inicio de sesión para acceder al sistema de trámites -->
-<div class="auth-container fade-in">
-  <div class="auth-card">
-    <div class="auth-header">
-      <img src="logo-drej.png" alt="Logo DREJ" class="drej-logo"/>
-      <h2>Bienvenido</h2>
-      <p class="text-soft">
-        Accede con tu DNI y contraseña para gestionar tus trámites.
-      </p>
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 via-primary-50 to-accent-50 p-4 animate-fade-in">
+  <div class="w-full max-w-md">
+    <!-- Tarjeta principal -->
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-scale-in">
+      
+      <!-- Header con logo y título -->
+      <div class="bg-gradient-primary px-8 py-10 text-center">
+        <!-- 🔥 CAMBIO AQUÍ: bg-white en lugar de bg-white/20 -->
+        <div class="inline-block p-4 bg-white rounded-2xl mb-4 shadow-lg">
+          <img src="logo-drej.png" alt="Logo DREJ" class="w-20 h-20 object-contain" />
+        </div>
+        <h2 class="text-2xl font-bold text-white mb-2 tracking-wide">Bienvenido</h2>
+        <p class="text-white/80 text-sm">
+          Accede con tu DNI y contraseña
+        </p>
+      </div>
+
+      <!-- Formulario -->
+      <div class="p-8">
+        <form [formGroup]="loginForm" (ngSubmit)="submit()" class="space-y-6">
+          
+          <!-- Campo DNI -->
+          <div class="space-y-2">
+            <label for="dni" class="flex items-center gap-2 text-sm font-semibold text-slate-700">
+              <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              DNI
+            </label>
+            <input 
+              id="dni" 
+              type="text" 
+              formControlName="dni" 
+              placeholder="Ingresa tu DNI" 
+              autocomplete="username"
+              class="w-full px-4 py-3 rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all duration-200 text-slate-900 placeholder-slate-400" />
+          </div>
+
+          <!-- Campo Contraseña -->
+          <div class="space-y-2">
+            <label for="password" class="flex items-center gap-2 text-sm font-semibold text-slate-700">
+              <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Contraseña
+            </label>
+            <input 
+              id="password" 
+              type="password" 
+              formControlName="password" 
+              placeholder="Ingresa tu contraseña" 
+              autocomplete="current-password"
+              class="w-full px-4 py-3 rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all duration-200 text-slate-900 placeholder-slate-400" />
+          </div>
+
+          <!-- Mensaje de error -->
+          @if (error) {
+            <div class="p-4 bg-warning-50 border border-warning-200 rounded-lg flex items-start gap-3 animate-slide-down" role="alert">
+              <svg class="w-5 h-5 text-warning-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+              <span class="text-sm font-medium text-warning-800">{{ error }}</span>
+            </div>
+          }
+
+          <!-- Botón de envío -->
+          <button 
+            type="submit" 
+            [disabled]="loading"
+            class="w-full px-6 py-3 bg-gradient-primary hover:opacity-90 text-white font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 group">
+            @if (loading) {
+              <svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Ingresando...</span>
+            }
+            @if (!loading) {
+              <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+              <span>Ingresar</span>
+            }
+          </button>
+        </form>
+
+        <!-- Nota de contacto -->
+        <div class="mt-6 pt-6 border-t border-slate-200 text-center">
+          <p class="text-sm text-slate-600 flex items-center justify-center gap-2">
+            <svg class="w-4 h-4 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            ¿Necesitas acceso?
+          </p>
+          <p class="text-xs text-accent-600 font-semibold mt-1">
+            Contacta con un administrador
+          </p>
+        </div>
+      </div>
+
+      <!-- Footer decorativo -->
+      <div class="h-2 bg-gradient-to-r from-primary-500 via-accent-500 to-secondary-500"></div>
     </div>
-    <form [formGroup]="loginForm" (ngSubmit)="submit()">
-      <!-- Campo DNI -->
-      <div class="input-group">
-        <label for="dni">DNI</label>
-        <input id="dni" type="text" formControlName="dni" placeholder="Tu DNI" autocomplete="username" />
-      </div>
-      <!-- Campo Contraseña -->
-      <div class="input-group">
-        <label for="password">Contraseña</label>
-        <input id="password" type="password" formControlName="password" placeholder="Contraseña" autocomplete="current-password" />
-      </div>
-      <!-- Mensaje de error si las credenciales no son válidas -->
-      @if (error) {
-        <div class="error">{{ error }}</div>
-      }
-      <!-- Botón para enviar el formulario -->
-      <button type="submit" [disabled]="loading" class="main-btn">
-        @if (loading) {
-          <span class="loader"></span>
-        }
-        Entrar
-      </button>
-    </form>
-    <!-- Nota para solicitar acceso administrativo -->
-    <p class="admin-access">
-      ¿Necesitas acceso? <br> Contacta con un administrador.
+
+    <!-- Texto legal opcional -->
+    <p class="text-center text-xs text-slate-500 mt-6">
+      © 2025 DREJ - Sistema de Gestión de Trámites
     </p>
   </div>
 </div>
