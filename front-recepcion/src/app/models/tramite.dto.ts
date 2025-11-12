@@ -6,4 +6,5 @@ export interface TramiteDTO {
   detalles: string;
   dniEncargado: string;
   fechasPedidas?: string;
+  fechaInicio: Date;
 }

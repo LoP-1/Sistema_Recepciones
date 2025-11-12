@@ -1,6 +1,7 @@
 package com.sistema.recepcion.controllers;
 
 import com.sistema.recepcion.DTO.DniDTO;
+import com.sistema.recepcion.DTO.FinalizarTramiteDTO;
 import com.sistema.recepcion.DTO.MensajeDTO;
 import com.sistema.recepcion.DTO.TramiteDTO;
 import com.sistema.recepcion.models.DetallesTramite;
@@ -9,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import com.sistema.recepcion.services.TramiteService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
 import java.util.List;
 
 
@@ -35,9 +38,9 @@ public class TramiteController {
 
     // finalizar un tramite
     @PostMapping("/finalizar")
-    public ResponseEntity<MensajeDTO> finalizarTramite(@RequestBody Long id) {
+    public ResponseEntity<MensajeDTO> finalizarTramite(@RequestBody FinalizarTramiteDTO finalizarTramiteDTO) {
         //igual que el anterior , envia datos y recibe string
-        String resultado = tramiteService.finalizarTramite(id);
+        String resultado = tramiteService.finalizarTramite(finalizarTramiteDTO.getId(), finalizarTramiteDTO.getFecha());
         if (resultado.equals("Trámite marcado como completado")){
             return ResponseEntity.ok(new MensajeDTO(resultado));
         } else {

@@ -15,7 +15,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-//configuracion de seguridad
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -23,7 +22,6 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
-    //aca se definen que rutas estan libres sin token
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -31,19 +29,21 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // permitir consola H2
+                        .requestMatchers("/h2-console/**", "/h2-console").permitAll()
                         .requestMatchers("/encargado/login", "/encargado/registrar", "/download/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .headers(h -> h.frameOptions(f -> f.sameOrigin()));
 
+        // el filtro sigue estando, pero el filtro mismo debe ignorar rutas públicas
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
-    //aca se agregan ips que pueden comunicarse, si hay error de cors agregar el dominio aca
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        //en esta parte -->
         config.setAllowedOrigins(List.of("http://localhost:4200","http://192.168.10.69:80","http://192.168.10.69:4200","http://192.168.10.69"));
         config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization","Content-Type","X-Requested-With","Accept","Origin"));

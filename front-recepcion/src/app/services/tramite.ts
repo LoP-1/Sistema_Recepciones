@@ -10,6 +10,11 @@ import { DniDTO } from '../models/dni.dto';
 import { Observable } from 'rxjs';
 import { HistorialProceso } from '../models/historial';
 
+export interface FinalizarTramiteDTO {
+  id: number;
+  fecha?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class TramiteService {
   private http = inject(HttpClient);
@@ -21,10 +26,13 @@ export class TramiteService {
   }
 
   // Marca un trámite como finalizado usando su ID
-  finalizarTramite(id: number): Observable<MensajeDTO> {
-    // El backend espera el número "plano" en body (JSON number)
-    return this.http.post<MensajeDTO>(`${this.base}/finalizar`, id);
-  }
+finalizarTramite(id: number): Observable<MensajeDTO> {
+  const payload: FinalizarTramiteDTO = {
+    id,
+    fecha: limaIsoNow(new Date())
+  };
+  return this.http.post<MensajeDTO>(`${this.base}/finalizar`, payload);
+}
 
   // Lista todos los trámites asociados al DNI dado
   listarPorDni(dni: string): Observable<Tramite[]> {
@@ -41,4 +49,44 @@ export class TramiteService {
   obtenerHistorial(idTramite: number): Observable<HistorialProceso[]> {
     return this.http.post<HistorialProceso[]>(`${this.base}/historial`, idTramite);
   }
+}
+
+// helpers para obtener fecha/hora en zona America/Lima y armar ISO con offset "-05:00"
+
+function pad(n: number, z = 2) {
+  return String(Math.abs(Math.floor(n))).padStart(z, '0');
+}
+
+// devuelve ISO en zona America/Lima con offset fijo -05:00, por ejemplo:
+// "2025-11-12T11:37:04.428-05:00"
+function limaIsoNow(date = new Date()): string {
+  // Obtiene partes en la zona America/Lima
+  const dtf = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Lima',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+
+  const parts = dtf.formatToParts(date).reduce<Record<string,string>>((acc, p) => {
+    if (p.type !== 'literal') acc[p.type] = p.value;
+    return acc;
+  }, {});
+
+  const year = parts['year'];
+  const month = parts['month'];
+  const day = parts['day'];
+  const hour = parts['hour'];
+  const minute = parts['minute'];
+  const second = parts['second'];
+  const ms = String(date.getMilliseconds()).padStart(3, '0');
+
+  // Perú es UTC-5, offset fijo:
+  const offset = '-05:00';
+
+  return `${year}-${month}-${day}T${hour}:${minute}:${second}.${ms}${offset}`;
 }

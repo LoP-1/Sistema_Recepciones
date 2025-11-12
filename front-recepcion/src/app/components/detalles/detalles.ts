@@ -310,19 +310,6 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
       .replace(/"/g,'&quot;')
       .replace(/'/g,'&#39;');
 
-  const formatFecha = (f: any) => {
-    if (!f) return '';
-    try {
-      const d = new Date(f);
-      if (isNaN(d.getTime())) return escapeHtml(f);
-      return d.toLocaleDateString('es-PE', {
-        year: 'numeric', month: '2-digit', day: '2-digit'
-      });
-    } catch {
-      return escapeHtml(f);
-    }
-  };
-
   const logoUrl = 'logo-drej.png'; // Ruta real proporcionada
 
   const fechaEmision = new Date();
@@ -491,11 +478,11 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
           </tr>
           <tr>
             <td class="label">Fecha inicio</td>
-            <td>${formatFecha(tramite.fechaInicio)}</td>
+            <td>${tramite.fechaInicio}</td>
           </tr>
           <tr>
             <td class="label">Fecha fin</td>
-            <td>${tramite.fechaFin ? formatFecha(tramite.fechaFin) : 'En proceso'}</td>
+            <td>${tramite.fechaFin ? tramite.fechaFin : 'En proceso'}</td>
           </tr>
           <tr>
             <td class="label">Estado</td>

@@ -18,52 +18,50 @@ import { ModalService } from '../../shared/ui/modal/modal.service';
   styleUrl: './dashboard.css'
 })
 export class Dashboard implements AfterViewInit {
-  // Inyección de servicios y herramientas de Angular
   private fb = inject(FormBuilder);
   private personaService = inject(PersonaService);
   private tramiteService = inject(TramiteService);
   private modal = inject(ModalService);
 
-  // Referencia de input para enfocar expediente
   @ViewChild('expedienteInput') expedienteInput!: ElementRef<HTMLInputElement>;
 
-  // Formulario principal de registro/actualización
   form = this.fb.nonNullable.group({
     nombre: ['', Validators.required],
     dni: ['', Validators.required],
     telefono: ['', Validators.required],
     expediente: ['', Validators.required],
     detalles: ['', Validators.required],
-    fechaInicio: [''],   
-    fechaFin: [''], 
+    // fechaInicio (date) stays required
+    fechaInicio: ['', Validators.required],
+    fechaFin: [''],
+    // nuevos controles para los campos de "Períodos" (texto libre)
+    periodoInicio: [''],
+    periodoFin: [''],
   });
-  // Señales para feedback y estados de carga
+
   mensajeRegistro = signal('');
   loadingReg = signal(false);
   loadingActualizar = signal(false);
-  // Filtros de trámites
-filtroExpediente = signal('');
+
+  filtroExpediente = signal('');
   filtroFechaInicio = signal('');
   filtroFechaFin = signal('');
-  // Listado y filtrado de personas
+
   personas = signal<Persona[]>([]);
   filtroPersonas = signal('');
   personasLoading = signal(false);
   personasError = signal('');
   personaSeleccionada = signal<Persona | null>(null);
 
-  // Listado y filtrado de trámites
   tramites = signal<Tramite[]>([]);
   cargandoTramites = signal(false);
   mostrarCompletados = signal(false);
   tecladoIndex = signal(-1);
 
-  // Paginación
   pageSizeOptions = [5, 10, 20, 50];
   pageSize = signal(10);
   currentPage = signal(1);
 
-  // Computed para filtro de personas según texto de búsqueda
   personasFiltradas = computed(() => {
     const term = this.filtroPersonas().toLowerCase().trim();
     const base = this.personas();
@@ -74,7 +72,6 @@ filtroExpediente = signal('');
     );
   });
 
-  // Computed para total de páginas y personas en página actual
   totalPages = computed(() =>
     Math.max(1, Math.ceil(this.personasFiltradas().length / this.pageSize()))
   );
@@ -88,17 +85,14 @@ filtroExpediente = signal('');
     return this.personasFiltradas().slice(start, start + ps);
   });
 
-  // Computed para filtrar trámites según estado
   tramitesFiltrados = computed(() =>
     this.mostrarCompletados() ? this.tramites() : this.tramites().filter(t => !t.estado)
   );
 
-  // Carga inicial de personas tras montar la vista
   ngAfterViewInit() {
     this.cargarPersonas();
   }
 
-  // Descarga y refresca listado de personas desde el backend
   cargarPersonas() {
     this.personasLoading.set(true);
     this.personasError.set('');
@@ -112,20 +106,17 @@ filtroExpediente = signal('');
     });
   }
 
-  // Actualiza filtro de personas y reinicia paginación
   onFiltroChange(v: string) {
     this.filtroPersonas.set(v);
     this.resetPaginationAfterFilter();
   }
 
-  // Reinicia página y teclado tras filtrar personas
   resetPaginationAfterFilter() {
     this.currentPage.set(1);
     const list = this.personasFiltradas();
     this.tecladoIndex.set(list.length ? 0 : -1);
   }
 
-  // Cambia página en paginación de listado de personas
   changePage(delta: number) {
     const next = this.currentPage() + delta;
     if (next < 1 || next > this.totalPages()) return;
@@ -133,14 +124,12 @@ filtroExpediente = signal('');
     this.tecladoIndex.set(this.personasPagina().length ? 0 : -1);
   }
 
-  // Cambia cantidad de elementos por página
   setPageSize(size: number) {
     this.pageSize.set(size);
     this.currentPage.set(1);
     this.tecladoIndex.set(this.personasPagina().length ? 0 : -1);
   }
 
-  // Selecciona persona y carga sus trámites
   seleccionarPersona(p: Persona, focusExpediente = true) {
     this.personaSeleccionada.set(p);
     this.form.patchValue({
@@ -154,7 +143,6 @@ filtroExpediente = signal('');
     }
   }
 
-  // Navegación con teclado en listado de personas
   personasKeydown(ev: KeyboardEvent) {
     const list = this.personasPagina();
     if (!list.length) return;
@@ -175,7 +163,6 @@ filtroExpediente = signal('');
     }
   }
 
-  // Descarga trámites vinculados al DNI actual
   cargarTramitesPorDni() {
     const dni = this.form.value.dni;
     if (!dni) return;
@@ -187,13 +174,14 @@ filtroExpediente = signal('');
     });
   }
 
-  // Refresca trámites del usuario seleccionado
   refrescarTramites() {
     if (this.personaSeleccionada()) this.cargarTramitesPorDni();
   }
 
-  // Envía el formulario para registrar un nuevo trámite
-registrar() {
+  registrar() {
+    const periodoInicio = this.form.value.periodoInicio || '';
+    const periodoFin = this.form.value.periodoFin || '';
+    // el formulario ahora requiere fechaInicio
     if (this.form.invalid) {
       this.focusFirstInvalid();
       return;
@@ -201,15 +189,29 @@ registrar() {
     this.loadingReg.set(true);
     this.mensajeRegistro.set('');
     const dniEncargado = localStorage.getItem('dni') || '';
-    // Nuevo: compone el rango de fechas en texto
+    // Nuevo: compone el rango de fechas en texto (si aplica)
     const fechasPedidas = `${this.form.value.fechaInicio}-${this.form.value.fechaFin}`;
-    const payload: TramiteDTO = { ...this.form.getRawValue(), dniEncargado, fechasPedidas };
+    const raw = this.form.getRawValue();
+
+    // Convertir fechaInicio del input a Date
+    const fechaInicioDate = raw.fechaInicio ? new Date(raw.fechaInicio) : new Date();
+
+    const payload: TramiteDTO = {
+      nombre: raw.nombre,
+      dni: raw.dni,
+      telefono: raw.telefono,
+      expediente: raw.expediente,
+      detalles: raw.detalles,
+      dniEncargado,
+      fechasPedidas,
+      fechaInicio: fechaInicioDate
+    };
 
     this.tramiteService.registrarTramite(payload)
       .pipe(finalize(() => this.loadingReg.set(false)))
       .subscribe({
         next: r => {
-          this.mensajeRegistro.set(r && r.mensaje ? r.mensaje : 'Trámite registrado con éxito 👍');
+          this.mensajeRegistro.set(r && r.mensaje ? r.mensaje : 'Trámite registrado con éxito');
           this.cargarTramitesPorDni();
           this.cargarPersonas();
           const match = this.personas().find(p => p.dni === this.form.value.dni);
@@ -220,7 +222,7 @@ registrar() {
         },
         error: e => {
           if (e.status >= 200 && e.status < 300) {
-            this.mensajeRegistro.set('Trámite registrado con éxito 👍');
+            this.mensajeRegistro.set('Trámite registrado con éxito');
             setTimeout(() => this.mensajeRegistro.set(''), 3000);
           } else {
             this.mensajeRegistro.set(e.error?.mensaje || 'Error al registrar');
@@ -229,10 +231,6 @@ registrar() {
       });
   }
 
-  /**
-   * Actualizar datos básicos de persona (nombre, dni, teléfono) usando tramiteService.
-   * No se requiere detalles ni expediente. El loading se limpia incluso si falla.
-   */
   actualizarDatos() {
     const controls = this.form.controls;
     if (controls.nombre.invalid || controls.dni.invalid || controls.telefono.invalid) {
@@ -248,7 +246,6 @@ registrar() {
     const dni = this.form.value.dni;
     const { nombre, telefono } = this.form.getRawValue();
 
-    // Solo los datos básicos, sin detalles, expediente ni encargado
     const payload: Partial<TramiteDTO> = { nombre, dni, telefono };
 
     this.tramiteService.registrarTramite(payload as TramiteDTO)
@@ -273,7 +270,6 @@ registrar() {
       });
   }
 
-  // Limpia el formulario y deselecciona persona
   limpiarForm() {
     const p = this.personaSeleccionada();
     this.form.reset({
@@ -283,31 +279,27 @@ registrar() {
       expediente: '',
       detalles: ''
     });
-    this.personaSeleccionada.set(null); 
+    this.personaSeleccionada.set(null);
   }
-
 
   getIniciales(persona: Persona): string {
-  const nombre = persona.nombre?.charAt(0) || '';
-  const apellido = (persona as any).apellido?.charAt(0) || '';
-  return nombre + apellido;
+    const nombre = persona.nombre?.charAt(0) || '';
+    const apellido = (persona as any).apellido?.charAt(0) || '';
+    return nombre + apellido;
   }
-  // Cierra sesión y recarga la app
+
   logout() {
     localStorage.clear();
     location.reload();
   }
 
-  // Alterna entre mostrar trámites activos o completados
   toggleCompletados() {
     this.mostrarCompletados.set(!this.mostrarCompletados());
   }
 
-  // Trackers para optimizar renderizado de listas
   trackPersona = (_: number, p: Persona) => p.idPersona;
   trackTramite = (_: number, t: Tramite) => t.idTramite;
 
-  // Enfoca el primer campo inválido del formulario
   private focusFirstInvalid() {
     const key = Object.keys(this.form.controls).find(k => (this.form.controls as any)[k].invalid);
     if (!key) return;
@@ -315,42 +307,35 @@ registrar() {
     el?.focus();
   }
 
-  // Abre el modal para agregar detalles a un trámite
   abrirDetalles(idTramite: number) {
     this.modal.open(AgregarDetallesTramite, {
       data: { idTramite },
       ariaLabel: 'Agregar detalles al trámite',
-      width: 'min(1400px, 95vw)',
+      width: 'min(1500px, 95vw)',
       panelClass: 'modal-sheet'
     });
   }
 
-tramitesFiltradosTabla = computed(() => {
+  tramitesFiltradosTabla = computed(() => {
     let list = this.mostrarCompletados() ? this.tramites() : this.tramites().filter(t => !t.estado);
-
-    // Filtrado por número de expediente si hay texto
     const exp = this.filtroExpediente().trim();
     if (exp) {
       list = list.filter(t => t.nroExpediente?.toString().includes(exp));
     }
-
-    // Filtrado por rango de fechas si ambos están presentes
     const ini = this.filtroFechaInicio().trim();
     const fin = this.filtroFechaFin().trim();
     list = list.filter(t => {
-  const tIni = t.fechaInicio ? new Date(t.fechaInicio).getFullYear().toString() : '';
-  const tFin = t.fechaFin ? new Date(t.fechaFin).getFullYear().toString() : '';
-  let match = true;
-  if (ini) {
-    match = match && tIni >= ini;
-  }
-  if (fin) {
-    match = match && (tFin ? tFin <= fin : true);
-  }
-  return match;
-});
+      const tIni = t.fechaInicio ? new Date(t.fechaInicio).getFullYear().toString() : '';
+      const tFin = t.fechaFin ? new Date(t.fechaFin).getFullYear().toString() : '';
+      let match = true;
+      if (ini) {
+        match = match && tIni >= ini;
+      }
+      if (fin) {
+        match = match && (tFin ? tFin <= fin : true);
+      }
+      return match;
+    });
     return list;
   });
-
-
 }

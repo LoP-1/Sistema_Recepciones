@@ -21,7 +21,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-//el servicio mas largo pero no dificil...
 @Service
 public class TramiteService {
 
@@ -77,7 +76,7 @@ public class TramiteService {
         // Crear y guardar el trámite
         Tramite tramite = new Tramite();
         tramite.setPersona(persona);
-        tramite.setFechaInicio(new Date());
+        tramite.setFechaInicio(datosTramite.getFechaInicio());
         tramite.setDescripcion(datosTramite.getDetalles());
         tramite.setNroExpediente(datosTramite.getExpediente());
         tramite.setEncargado(encargado);
@@ -101,7 +100,7 @@ public class TramiteService {
 
 
     //metodo para marcar un tramite como finalizado, recibe el id del tramite
-    public String finalizarTramite(Long idTramite) {
+    public String finalizarTramite(Long idTramite,Date fin) {
         //busca el tramite en la bd
         Optional<Tramite> tramiteOPC = tramiteRepository.findById(idTramite);
         //si el tramite ya fue marcado anteriormente como finalizado se termina el proceso y se manda el mensaje
@@ -126,7 +125,7 @@ public class TramiteService {
 
 
             //cambia el estado del tramite
-            tramite.setFechaFin(new Date());
+            tramite.setFechaFin(fin);
             //agrega la fecha de finalizacion
             tramiteRepository.save(tramite);
             return "Trámite marcado como completado";

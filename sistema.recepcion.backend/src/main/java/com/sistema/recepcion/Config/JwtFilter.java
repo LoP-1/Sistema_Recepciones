@@ -39,7 +39,8 @@ public class JwtFilter extends OncePerRequestFilter {
         boolean publicEndpoint =
                 path.startsWith("/encargado/login") ||
                         path.startsWith("/encargado/registrar") ||
-                        path.startsWith("/download/");
+                        path.startsWith("/download/")||
+        path.startsWith("/h2-console");
 
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 

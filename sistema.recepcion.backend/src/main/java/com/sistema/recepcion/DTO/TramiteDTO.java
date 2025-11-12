@@ -1,5 +1,8 @@
 package com.sistema.recepcion.DTO;
 
+import javax.xml.crypto.Data;
+import java.util.Date;
+
 //igual que los otros dto, esta mas completo porque tiene mas datos :p
 public class TramiteDTO {
     private String nombre;
@@ -9,9 +12,18 @@ public class TramiteDTO {
     private String detalles;
     private String dniEncargado;
     private String fechasPedidas;
+    private Date fechaInicio;
 
     //getters y setters
 
+
+    public Date getFechaInicio() {
+        return fechaInicio;
+    }
+
+    public void setFechaInicio(Date fechaInicio) {
+        this.fechaInicio = fechaInicio;
+    }
 
     public String getFechasPedidas() {
         return fechasPedidas;
