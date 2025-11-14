@@ -190,7 +190,7 @@ export class Dashboard implements AfterViewInit {
     this.mensajeRegistro.set('');
     const dniEncargado = localStorage.getItem('dni') || '';
     // Nuevo: compone el rango de fechas en texto (si aplica)
-    const fechasPedidas = `${this.form.value.fechaInicio}-${this.form.value.fechaFin}`;
+    const fechasPedidas = `${this.form.value.periodoInicio} hasta ${this.form.value.periodoFin}`;
     const raw = this.form.getRawValue();
 
     // Convertir fechaInicio del input a Date

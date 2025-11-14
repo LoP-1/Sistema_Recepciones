@@ -477,12 +477,8 @@ export class AgregarDetallesTramite implements OnInit, OnDestroy {
             <td>${escapeHtml(tramite.fechas || '')}</td>
           </tr>
           <tr>
-            <td class="label">Fecha inicio</td>
+            <td class="label">Fecha Expediente</td>
             <td>${tramite.fechaInicio}</td>
-          </tr>
-          <tr>
-            <td class="label">Fecha fin</td>
-            <td>${tramite.fechaFin ? tramite.fechaFin : 'En proceso'}</td>
           </tr>
           <tr>
             <td class="label">Estado</td>
